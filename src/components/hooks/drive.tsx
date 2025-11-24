@@ -5,7 +5,8 @@ import { DriveInfo, FileItem } from "../../types";
 
 const useDrive = () => {
   const [showFiles, setShowFiles] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isFilesLoading, setIsFilesLoading] = useState<boolean>(false);
+  const [isSidebarLoading, setIsSidebarLoading] = useState<boolean>(true);
   const [driveInfo, setDriveInfo] = useState<DriveInfo | null>(null);
   const [files, setFiles] = useState<FileItem[]>([]);
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
@@ -22,10 +23,12 @@ const useDrive = () => {
   const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+  const [fileCache, setFileCache] = useState<Record<string, FileItem[]>>({});
 
   useEffect(() => {
     const fetchDriveInfo = async () => {
-      setIsLoading(true);
+      setIsSidebarLoading(true);
+      setIsFilesLoading(true);
       try {
         const driveResponse = await fetch("/api/drive/info");
         const driveData = await driveResponse.json();
@@ -35,11 +38,13 @@ const useDrive = () => {
         const filesData = await filesResponse.json();
         const sortedFiles = sortFilesByType(filesData.files || []);
         setFiles(sortedFiles);
+        setFileCache((prev) => ({ ...prev, root: sortedFiles }));
       } catch (error) {
         console.error("Lỗi khi lấy danh sách thư mục:", error);
         setFiles([]);
       } finally {
-        setIsLoading(false);
+        setIsSidebarLoading(false);
+        setIsFilesLoading(false);
       }
     };
     fetchDriveInfo();
@@ -78,17 +83,26 @@ const useDrive = () => {
 
     setCurrentFolderId(folderId);
     setCurrentFolderName(folderName || "");
-    setIsLoading(true);
+
+    if (fileCache[folderId]) {
+      setFiles(fileCache[folderId]);
+      setShowFiles(true);
+      return;
+    }
+
+    setIsFilesLoading(true);
 
     try {
       const response = await fetch(`/api/drive?folderId=${folderId}`);
       const data = await response.json();
-      setFiles(sortFilesByType(data.files));
+      const sortedFiles = sortFilesByType(data.files);
+      setFiles(sortedFiles);
+      setFileCache((prev) => ({ ...prev, [folderId]: sortedFiles }));
       setShowFiles(true);
     } catch (error) {
       console.error("Lỗi:", error);
     } finally {
-      setIsLoading(false);
+      setIsFilesLoading(false);
     }
   };
 
@@ -105,24 +119,43 @@ const useDrive = () => {
       setCurrentFolderId(previousFolderId || null);
       setCurrentFolderName(previousFolder?.name || "");
 
-      setIsLoading(true);
+      const targetId = previousFolderId || "root";
+      if (fileCache[targetId]) {
+        setFiles(fileCache[targetId]);
+        return;
+      }
+
+      setIsFilesLoading(true);
       try {
         const response = await fetch(
           `/api/drive${previousFolderId ? `?folderId=${previousFolderId}` : ""}`
         );
         const data = await response.json();
-        setFiles(sortFilesByType(data.files));
+        const sortedFiles = sortFilesByType(data.files);
+        setFiles(sortedFiles);
+        setFileCache((prev) => ({ ...prev, [targetId]: sortedFiles }));
       } catch (error) {
         console.error("Lỗi khi quay lại thư mục:", error);
       } finally {
-        setIsLoading(false);
+        setIsFilesLoading(false);
       }
     } else {
-      setIsLoading(true);
+      if (fileCache["root"]) {
+        setFiles(fileCache["root"]);
+        setCurrentFolderId(null);
+        setCurrentFolderName("");
+        setFolderPath([]);
+        setFolderHistory([]);
+        return;
+      }
+
+      setIsFilesLoading(true);
       try {
         const response = await fetch("/api/drive");
         const data = await response.json();
-        setFiles(sortFilesByType(data.files));
+        const sortedFiles = sortFilesByType(data.files);
+        setFiles(sortedFiles);
+        setFileCache((prev) => ({ ...prev, root: sortedFiles }));
         setCurrentFolderId(null);
         setCurrentFolderName("");
         setFolderPath([]);
@@ -130,7 +163,7 @@ const useDrive = () => {
       } catch (error) {
         console.error("Lỗi khi quay về thư mục gốc:", error);
       } finally {
-        setIsLoading(false);
+        setIsFilesLoading(false);
       }
     }
   };
@@ -182,7 +215,17 @@ const useDrive = () => {
           // Lấy nội dung thư mục mới
           const folderResponse = await fetch(`/api/drive?folderId=${data.id}`);
           const folderData = await folderResponse.json();
-          setFiles(sortFilesByType(folderData.files));
+          const sortedFiles = sortFilesByType(folderData.files);
+          setFiles(sortedFiles);
+          setFileCache((prev) => ({ ...prev, [data.id]: sortedFiles }));
+
+          // Invalidate parent folder cache
+          const parentId = currentFolderId || "root";
+          setFileCache((prev) => {
+            const newCache = { ...prev };
+            delete newCache[parentId];
+            return newCache;
+          });
         }
       }
     } catch (error) {
@@ -306,7 +349,12 @@ const useDrive = () => {
           }
         );
         const refreshData = await refreshResponse.json();
-        setFiles(sortFilesByType(refreshData.files));
+        const sortedFiles = sortFilesByType(refreshData.files);
+        setFiles(sortedFiles);
+
+        // Update cache for current folder
+        const cacheKey = currentFolderId || "root";
+        setFileCache((prev) => ({ ...prev, [cacheKey]: sortedFiles }));
       }, 2500); // Đợi 1 giây sau khi tất cả upload xong
     } catch (error) {
       console.error("Lỗi khi upload files:", error);
@@ -420,7 +468,12 @@ const useDrive = () => {
         { headers: { "Cache-Control": "no-cache" } }
       );
       const refreshData = await refreshResponse.json();
-      setFiles(sortFilesByType(refreshData.files));
+      const sortedFiles = sortFilesByType(refreshData.files);
+      setFiles(sortedFiles);
+
+      // Update cache for current folder
+      const cacheKey = currentFolderId || "root";
+      setFileCache((prev) => ({ ...prev, [cacheKey]: sortedFiles }));
     } catch (error) {
       console.error("Lỗi:", error);
       setFiles((prev) => prev.filter((f) => f.id !== tempFolder.id));
@@ -476,7 +529,7 @@ const useDrive = () => {
       return;
     }
 
-    setIsLoading(true);
+    setIsFilesLoading(true);
     try {
       if (isAISearch) {
         // Reset về thư mục gốc khi tìm kiếm
@@ -575,7 +628,7 @@ const useDrive = () => {
       console.error("Lỗi khi tìm kiếm:", error);
       setFiles([]);
     } finally {
-      setIsLoading(false);
+      setIsFilesLoading(false);
     }
   };
 
@@ -634,15 +687,22 @@ const useDrive = () => {
     const folder = folderPath[index];
     setCurrentFolderName(folder?.name || "");
 
-    setIsLoading(true);
+    if (fileCache[folderId]) {
+      setFiles(fileCache[folderId]);
+      return;
+    }
+
+    setIsFilesLoading(true);
     try {
       const response = await fetch(`/api/drive?folderId=${folderId}`);
       const data = await response.json();
-      setFiles(sortFilesByType(data.files));
+      const sortedFiles = sortFilesByType(data.files);
+      setFiles(sortedFiles);
+      setFileCache((prev) => ({ ...prev, [folderId]: sortedFiles }));
     } catch (error) {
       console.error("Lỗi khi điều hướng qua breadcrumb:", error);
     } finally {
-      setIsLoading(false);
+      setIsFilesLoading(false);
     }
   };
 
@@ -672,13 +732,17 @@ const useDrive = () => {
           }
         );
         const refreshData = await refreshResponse.json();
-        setFiles(sortFilesByType(refreshData.files));
+        const sortedFiles = sortFilesByType(refreshData.files);
+        setFiles(sortedFiles);
+        setFileCache((prev) => ({ ...prev, [currentFolderId]: sortedFiles }));
       } else {
         const refreshResponse = await fetch("/api/drive", {
           headers: { "Cache-Control": "no-cache" },
         });
         const refreshData = await refreshResponse.json();
-        setFiles(sortFilesByType(refreshData.files));
+        const sortedFiles = sortFilesByType(refreshData.files);
+        setFiles(sortedFiles);
+        setFileCache((prev) => ({ ...prev, root: sortedFiles }));
       }
     } catch (error) {
       console.error("Lỗi khi xóa file:", error);
@@ -689,8 +753,9 @@ const useDrive = () => {
   return {
     files,
     setFiles,
-    isLoading,
-    setIsLoading,
+    isLoading: isFilesLoading,
+    isSidebarLoading,
+    setIsLoading: setIsFilesLoading,
     driveInfo,
     setDriveInfo,
     currentFolderId,

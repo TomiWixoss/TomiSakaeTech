@@ -22,6 +22,7 @@ export default function Home() {
   const {
     files,
     isLoading,
+    isSidebarLoading,
     driveInfo,
     currentFolderId,
     currentFolderName,
@@ -100,7 +101,7 @@ export default function Home() {
             isOpen={isSidebarOpen}
             onClose={() => setIsSidebarOpen(false)}
             fileInputRef={React.useRef<HTMLInputElement>(null)}
-            isLoading={isLoading}
+            isLoading={isSidebarLoading}
           />
 
           <FileList
