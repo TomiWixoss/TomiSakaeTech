@@ -155,7 +155,7 @@ export const TechFileList: React.FC<FileListProps> = ({
           <div className="text-center">
             <UploadTechIcon size={64} className="mx-auto text-[#00ff88] mb-6 animate-bounce" />
             <p className="text-lg font-mono text-[#00ff88]">DROP_FILES_HERE</p>
-            <p className="text-xs font-mono text-muted-foreground mt-2">// UPLOAD TO CURRENT DIRECTORY</p>
+            <p className="text-xs font-mono text-muted-foreground mt-2">{/* UPLOAD TO CURRENT DIRECTORY */}</p>
           </div>
         </div>
       )}
@@ -320,7 +320,7 @@ export const TechFileList: React.FC<FileListProps> = ({
           <div className="flex flex-col items-center justify-center h-full py-24">
             <FolderTechIcon size={64} className="text-muted-foreground/30 mb-6" />
             <p className="text-lg font-mono text-muted-foreground mb-2">EMPTY_DIRECTORY</p>
-            <p className="text-xs font-mono text-muted-foreground/60">// DROP FILES TO UPLOAD</p>
+            <p className="text-xs font-mono text-muted-foreground/60">{/* DROP FILES TO UPLOAD */}</p>
           </div>
         ) : (
           <div ref={gridRef} className="p-6 lg:p-8">
@@ -524,7 +524,7 @@ export const TechFileList: React.FC<FileListProps> = ({
           <DialogHeader>
             <DialogTitle className="text-lg font-normal font-mono">DELETE_FILE</DialogTitle>
             <DialogDescription className="text-xs font-mono">
-              // CONFIRM DELETION OF &quot;{fileToDelete?.name}&quot;
+              {`CONFIRM DELETION OF "${fileToDelete?.name}"`}
             </DialogDescription>
           </DialogHeader>
           <Input

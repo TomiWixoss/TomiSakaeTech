@@ -18,13 +18,14 @@ export const ScanLine: React.FC<ScanLineProps> = ({
   const lineRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!lineRef.current) return;
+    const line = lineRef.current;
+    if (!line) return;
 
     const fromY = direction === "down" ? "-100%" : "100%";
     const toY = direction === "down" ? "100vh" : "-100vh";
 
     gsap.fromTo(
-      lineRef.current,
+      line,
       { y: fromY },
       {
         y: toY,
@@ -35,7 +36,7 @@ export const ScanLine: React.FC<ScanLineProps> = ({
     );
 
     return () => {
-      gsap.killTweensOf(lineRef.current);
+      gsap.killTweensOf(line);
     };
   }, [speed, direction]);
 

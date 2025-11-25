@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { TechLayout, TechHeader, TechSidebar } from "@/components/layout";
 import { TechFileList } from "@/components/files";
+import { ParticleField, NeonBorder, TechBadge, WaveformVisualizer } from "@/components/ui/tech";
 import {
   Dialog,
   DialogContent,
@@ -13,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Toaster } from "react-hot-toast";
 import useDrive from "@/components/hooks/drive";
-import { Menu } from "lucide-react";
+import { Menu, FolderPlus, Terminal } from "lucide-react";
 
 export default function Home() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -51,29 +52,49 @@ export default function Home() {
   } = useDrive();
 
   return (
-    <TechLayout showGrid showCircuits={false} showScanLine={false}>
+    <TechLayout showGrid showCircuits showCyberGrid={false} showScanLine={false}>
+      {/* Background particles */}
+      <div className="fixed inset-0 pointer-events-none">
+        <ParticleField 
+          color="#00ff88" 
+          particleCount={40} 
+          speed={0.2} 
+          connectDistance={120}
+          className="opacity-20"
+        />
+      </div>
+
       <Toaster
         position="bottom-center"
         toastOptions={{
           style: {
-            background: "hsl(var(--foreground))",
-            color: "hsl(var(--background))",
+            background: "#00ff88",
+            color: "#000",
             borderRadius: 0,
-            fontSize: "12px",
+            fontSize: "11px",
             fontFamily: "monospace",
+            fontWeight: "bold",
           },
         }}
       />
 
       {/* Mobile Menu Button */}
-      <div className="md:hidden flex items-center h-14 px-4 border-b border-border">
+      <div className="md:hidden flex items-center justify-between h-14 px-4 border-b border-border bg-background/95 relative z-50">
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+          className="p-2 text-muted-foreground hover:text-[#00ff88] transition-colors"
         >
           <Menu className="w-5 h-5" />
         </button>
-        <span className="ml-3 text-xs font-mono tracking-wider">DA22TTC</span>
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 border border-[#00ff88] flex items-center justify-center">
+            <Terminal className="w-3 h-3 text-[#00ff88]" />
+          </div>
+          <span className="text-xs font-mono font-bold">DA22TTC</span>
+        </div>
+        <TechBadge variant="success" size="sm" pulse>
+          ONLINE
+        </TechBadge>
       </div>
 
       <TechHeader
@@ -86,7 +107,7 @@ export default function Home() {
         isReloading={isReloading}
       />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative z-10">
         <TechSidebar
           driveInfo={driveInfo}
           onCreateFolder={handleCreateFolder}
@@ -126,23 +147,45 @@ export default function Home() {
           if (!isCreatingFolder) setIsCreateFolderModalOpen(open);
         }}
       >
-        <DialogContent className="sm:max-w-md rounded-none border-border font-mono">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-normal font-mono">NEW_FOLDER</DialogTitle>
-          </DialogHeader>
+        <DialogContent className="sm:max-w-md border-[#00ff88]/30 rounded-none bg-background p-0 overflow-hidden">
+          {/* Header */}
+          <div className="border-b border-[#00ff88]/20 bg-[#00ff88]/5 px-6 py-4">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3 font-mono">
+                <div className="w-8 h-8 border border-[#00ff88] flex items-center justify-center">
+                  <FolderPlus className="w-4 h-4 text-[#00ff88]" />
+                </div>
+                <span>NEW_FOLDER</span>
+                <TechBadge variant="success" size="sm">
+                  CREATE
+                </TechBadge>
+              </DialogTitle>
+            </DialogHeader>
+          </div>
 
-          <form onSubmit={handleCreateFolderSubmit}>
-            <Input
-              type="text"
-              value={newFolderName}
-              onChange={(e) => setNewFolderName(e.target.value)}
-              placeholder="FOLDER_NAME"
-              disabled={isCreatingFolder}
-              className="rounded-none border-border font-mono text-xs"
-              autoFocus
-            />
+          <form onSubmit={handleCreateFolderSubmit} className="p-6">
+            <NeonBorder color="#00ff88" intensity="low">
+              <Input
+                type="text"
+                value={newFolderName}
+                onChange={(e) => setNewFolderName(e.target.value)}
+                placeholder="FOLDER_NAME"
+                disabled={isCreatingFolder}
+                className="rounded-none border-0 bg-transparent font-mono text-sm h-12"
+                autoFocus
+              />
+            </NeonBorder>
 
-            <DialogFooter className="mt-4 gap-2">
+            <div className="flex items-center justify-between mt-4">
+              <WaveformVisualizer 
+                color="#00ff88" 
+                bars={8} 
+                height={20} 
+                active={newFolderName.length > 0} 
+              />
+            </div>
+
+            <DialogFooter className="mt-6 gap-3">
               <Button
                 type="button"
                 variant="ghost"
@@ -155,9 +198,9 @@ export default function Home() {
               <Button
                 type="submit"
                 disabled={isCreatingFolder || !newFolderName.trim()}
-                className="rounded-none font-mono text-xs"
+                className="rounded-none font-mono text-xs bg-[#00ff88] text-black hover:bg-[#00ff88]/90"
               >
-                {isCreatingFolder ? "CREATING..." : "CREATE"}
+                {isCreatingFolder ? "CREATING..." : "CREATE_FOLDER"}
               </Button>
             </DialogFooter>
           </form>

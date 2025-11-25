@@ -91,7 +91,7 @@ export const TechSidebar: React.FC<TechSidebarProps> = ({
         {/* Mobile Header */}
         <div className="flex items-center justify-between p-4 border-b border-border md:hidden">
           <span className="text-xs font-mono tracking-wider text-muted-foreground">
-            // MENU
+            MENU
           </span>
           <button
             onClick={onClose}
@@ -104,7 +104,7 @@ export const TechSidebar: React.FC<TechSidebarProps> = ({
         {/* Section Label */}
         <div className="px-4 py-3 border-b border-border/50">
           <span className="text-[10px] font-mono tracking-wider text-muted-foreground">
-            // ACTIONS
+            ACTIONS
           </span>
         </div>
 
@@ -233,7 +233,7 @@ export const TechSidebar: React.FC<TechSidebarProps> = ({
         {/* Footer */}
         <div className="px-4 py-2 border-t border-border/50">
           <span className="text-[9px] font-mono text-muted-foreground/50">
-            // DA22TTC-TVU SYSTEM
+            DA22TTC-TVU SYSTEM
           </span>
         </div>
       </aside>

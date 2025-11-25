@@ -20,14 +20,13 @@ export const GlitchText: React.FC<GlitchTextProps> = ({
   const textRef = useRef<HTMLSpanElement>(null);
   const [isGlitching, setIsGlitching] = useState(false);
 
-  const intensityConfig = {
-    low: { interval: 5000, duration: 150 },
-    medium: { interval: 3000, duration: 200 },
-    high: { interval: 1500, duration: 300 },
-  };
-
   useEffect(() => {
-    const config = intensityConfig[intensity];
+    const configs = {
+      low: { interval: 5000, duration: 150 },
+      medium: { interval: 3000, duration: 200 },
+      high: { interval: 1500, duration: 300 },
+    };
+    const config = configs[intensity];
     
     const glitch = () => {
       setIsGlitching(true);
