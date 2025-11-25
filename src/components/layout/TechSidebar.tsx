@@ -82,8 +82,9 @@ export const TechSidebar: React.FC<TechSidebarProps> = ({
       <aside
         ref={sidebarRef}
         className={cn(
-          "fixed md:sticky top-0 md:top-[120px] w-72 bg-background border-r border-border z-50",
-          "flex flex-col h-screen md:h-[calc(100vh-120px)]",
+          "w-72 bg-background border-r border-border z-50 shrink-0",
+          "flex flex-col",
+          "fixed md:sticky top-0 left-0 h-screen",
           "transition-transform duration-300 ease-out",
           isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}

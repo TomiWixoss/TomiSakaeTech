@@ -207,7 +207,7 @@ export default function Home() {
         isLoading={isLoading}
       />
 
-      <div className="flex flex-1 overflow-hidden relative z-10">
+      <div className="flex relative z-10">
         <TechSidebar
           driveInfo={driveInfo}
           onCreateFolder={handleCreateFolder}
@@ -222,7 +222,7 @@ export default function Home() {
 
         {/* Main content */}
         <main
-          className="flex-1 overflow-y-auto relative"
+          className="flex-1 min-h-screen relative"
           onDragEnter={handleDragEnter}
           onDragLeave={handleDragLeave}
           onDragOver={handleDragOver}
