@@ -248,14 +248,20 @@ export const useFileList = ({
 
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     dragCounter.current++;
-    setIsDragging(true);
+    if (!isDragging) {
+      setIsDragging(true);
+    }
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     dragCounter.current--;
-    if (dragCounter.current === 0) {
+    // Chỉ tắt khi thực sự rời khỏi vùng drop (counter = 0)
+    if (dragCounter.current <= 0) {
+      dragCounter.current = 0;
       setIsDragging(false);
     }
   };
@@ -373,6 +379,11 @@ export const useFileList = ({
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+    // Đảm bảo isDragging luôn true khi đang drag over
+    if (!isDragging) {
+      setIsDragging(true);
+    }
   };
 
   // Thêm hàm để tạo link tải file
