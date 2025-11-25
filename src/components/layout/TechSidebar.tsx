@@ -1,6 +1,6 @@
 "use client";
-import React, { useRef, useEffect } from "react";
-import gsap from "gsap";
+import React, { useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { DriveInfo } from "@/types";
 import { TechProgress, StatusIndicator } from "@/components/ui/tech";
 import { StorageTechIcon } from "@/components/icons/TechIcons";
@@ -26,6 +26,19 @@ interface TechSidebarProps {
   isLoading?: boolean;
 }
 
+const navItemVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: {
+      delay: i * 0.08,
+      duration: 0.4,
+      ease: [0.33, 1, 0.68, 1], // power3.out equivalent
+    },
+  }),
+};
+
 export const TechSidebar: React.FC<TechSidebarProps> = ({
   driveInfo,
   onCreateFolder,
@@ -37,50 +50,27 @@ export const TechSidebar: React.FC<TechSidebarProps> = ({
   fileInputRef,
   isLoading = false,
 }) => {
-  const sidebarRef = useRef<HTMLElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
-  const navRef = useRef<HTMLDivElement>(null);
 
   const storagePercent = driveInfo ? (driveInfo.used / driveInfo.total) * 100 : 0;
-
-  useEffect(() => {
-    if (!isLoading && navRef.current) {
-      const items = navRef.current.querySelectorAll(".nav-item");
-      gsap.fromTo(
-        items,
-        { opacity: 0, x: -20 },
-        {
-          opacity: 1,
-          x: 0,
-          duration: 0.4,
-          stagger: 0.08,
-          ease: "power3.out",
-        }
-      );
-    }
-  }, [isLoading]);
-
-  const handleItemHover = (e: React.MouseEvent, enter: boolean) => {
-    gsap.to(e.currentTarget, {
-      x: enter ? 4 : 0,
-      backgroundColor: enter ? "hsl(var(--muted) / 0.5)" : "transparent",
-      duration: 0.2,
-      ease: "power2.out",
-    });
-  };
 
   return (
     <>
       {/* Mobile Overlay */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-background/90 z-40 md:hidden"
-          onClick={onClose}
-        />
-      )}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-background/90 z-40 md:hidden"
+            onClick={onClose}
+          />
+        )}
+      </AnimatePresence>
 
       <aside
-        ref={sidebarRef}
         className={cn(
           "w-72 bg-background border-r border-border z-50 shrink-0",
           "flex flex-col h-full",
@@ -111,7 +101,7 @@ export const TechSidebar: React.FC<TechSidebarProps> = ({
         </div>
 
         {/* Navigation */}
-        <div ref={navRef} className="flex-1 p-3 overflow-y-auto">
+        <div className="flex-1 p-3 overflow-y-auto">
           {isLoading ? (
             <div className="space-y-2">
               {[...Array(4)].map((_, i) => (
@@ -124,56 +114,80 @@ export const TechSidebar: React.FC<TechSidebarProps> = ({
             </div>
           ) : (
             <nav className="space-y-1">
-              <button
+              <motion.button
+                custom={0}
+                initial="hidden"
+                animate="visible"
+                variants={navItemVariants}
+                whileHover={{ x: 4, backgroundColor: "hsl(var(--muted) / 0.5)" }}
+                transition={{ duration: 0.2 }}
                 onClick={() => {
                   onClose();
                   onCreateFolder();
                 }}
-                onMouseEnter={(e) => handleItemHover(e, true)}
-                onMouseLeave={(e) => handleItemHover(e, false)}
-                className="nav-item w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors group"
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors group"
               >
                 <FolderPlus className="w-4 h-4 text-muted-foreground group-hover:text-[#00ff88] transition-colors" />
                 <span className="font-mono text-xs">NEW_FOLDER</span>
                 <span className="ml-auto text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity font-mono">
                   ⌘N
                 </span>
-              </button>
+              </motion.button>
 
-              <label
+              <motion.label
+                custom={1}
+                initial="hidden"
+                animate="visible"
+                variants={navItemVariants}
+                whileHover={{ x: 4, backgroundColor: "hsl(var(--muted) / 0.5)" }}
+                transition={{ duration: 0.2 }}
                 htmlFor="fileInput"
-                onMouseEnter={(e) => handleItemHover(e, true)}
-                onMouseLeave={(e) => handleItemHover(e, false)}
-                className="nav-item w-full flex items-center gap-3 px-4 py-3 text-sm cursor-pointer transition-colors group"
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm cursor-pointer transition-colors group"
               >
                 <FileUp className="w-4 h-4 text-muted-foreground group-hover:text-[#00ff88] transition-colors" />
                 <span className="font-mono text-xs">UPLOAD_FILE</span>
                 <span className="ml-auto text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity font-mono">
                   ⌘U
                 </span>
-              </label>
+              </motion.label>
 
-              <label
+              <motion.label
+                custom={2}
+                initial="hidden"
+                animate="visible"
+                variants={navItemVariants}
+                whileHover={{ x: 4, backgroundColor: "hsl(var(--muted) / 0.5)" }}
+                transition={{ duration: 0.2 }}
                 htmlFor="folderInput"
-                onMouseEnter={(e) => handleItemHover(e, true)}
-                onMouseLeave={(e) => handleItemHover(e, false)}
-                className="nav-item w-full flex items-center gap-3 px-4 py-3 text-sm cursor-pointer transition-colors group"
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm cursor-pointer transition-colors group"
               >
                 <FolderUp className="w-4 h-4 text-muted-foreground group-hover:text-[#00ff88] transition-colors" />
                 <span className="font-mono text-xs">UPLOAD_FOLDER</span>
-              </label>
+              </motion.label>
 
               {/* Divider */}
-              <div className="my-4 border-t border-border/50" />
+              <motion.div
+                custom={3}
+                initial="hidden"
+                animate="visible"
+                variants={navItemVariants}
+                className="my-4 border-t border-border/50"
+              />
 
               {/* Drive info */}
-              <div className="nav-item px-4 py-3">
+              <motion.div
+                custom={4}
+                initial="hidden"
+                animate="visible"
+                variants={navItemVariants}
+                className="px-4 py-3"
+              >
                 <div className="flex items-center gap-3 mb-3">
                   <StorageTechIcon size={16} className="text-muted-foreground" />
                   <span className="font-mono text-xs text-muted-foreground">STORAGE</span>
                 </div>
                 <StatusIndicator status="online" size="sm" />
-              </div>
+              </motion.div>
             </nav>
           )}
 
