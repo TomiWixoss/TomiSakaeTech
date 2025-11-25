@@ -6,7 +6,14 @@ import toast from "react-hot-toast";
 import gsap from "gsap";
 import { useNote } from "@/components/hooks/note";
 import { TechLayout } from "@/components/layout";
-import { ParticleField, DataStream } from "@/components/ui/tech";
+import { 
+  ParticleField, 
+  DataStream, 
+  ScanLine, 
+  RadarScan, 
+  LoadingDots,
+  StatusIndicator,
+} from "@/components/ui/tech";
 import {
   TxtHero,
   TxtNavbar,
@@ -127,6 +134,9 @@ const TxtPage = () => {
         />
       </div>
 
+      {/* Scan line effect */}
+      <ScanLine color="#00ff88" speed={5} />
+
       {/* Navigation */}
       <TxtNavbar
         totalNotes={filteredNotes.length}
@@ -152,18 +162,30 @@ const TxtPage = () => {
       <main className="px-6 lg:px-12 py-12 relative z-10">
         <div className="max-w-[1400px] mx-auto">
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[...Array(6)].map((_, i) => (
-                <div
-                  key={i}
-                  className="border border-border p-6 animate-pulse"
-                  style={{ animationDelay: `${i * 0.1}s` }}
-                >
-                  <div className="h-4 w-20 bg-muted/30 mb-4" />
-                  <div className="h-32 bg-muted/30 mb-4" />
-                  <div className="h-4 w-16 bg-muted/30" />
+            <div className="relative">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[...Array(6)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="border border-border p-6 animate-pulse"
+                    style={{ animationDelay: `${i * 0.1}s` }}
+                  >
+                    <div className="h-4 w-20 bg-muted/30 mb-4" />
+                    <div className="h-32 bg-muted/30 mb-4" />
+                    <div className="h-4 w-16 bg-muted/30" />
+                  </div>
+                ))}
+              </div>
+              {/* Loading overlay */}
+              <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm">
+                <div className="flex flex-col items-center gap-4">
+                  <RadarScan size={80} color="#00ff88" speed={2} />
+                  <div className="flex items-center gap-2">
+                    <LoadingDots color="#00ff88" size={6} />
+                    <span className="text-xs font-mono text-muted-foreground">LOADING_NOTES</span>
+                  </div>
                 </div>
-              ))}
+              </div>
             </div>
           ) : paginatedNotes.length === 0 ? (
             <TxtEmptyState
@@ -245,6 +267,14 @@ const TxtPage = () => {
         onConfirmCodeChange={setDeleteCode}
         onConfirm={() => handleDeleteNote(deleteMode!)}
       />
+
+      {/* Status indicator - Fixed bottom right */}
+      <div className="fixed bottom-4 right-4 z-40 hidden md:flex items-center gap-3 border border-border bg-background/95 backdrop-blur-sm px-4 py-2">
+        <StatusIndicator status={loading ? "loading" : "online"} size="sm" />
+        <span className="text-[10px] font-mono text-muted-foreground">
+          {loading ? "SYNCING" : `${filteredNotes.length}_NOTES`}
+        </span>
+      </div>
 
       <Toaster
         position="bottom-center"

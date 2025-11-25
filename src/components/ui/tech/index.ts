@@ -21,3 +21,7 @@ export { TechBadge } from "./TechBadge";
 export { AnimatedCounter } from "./AnimatedCounter";
 export { LoadingDots } from "./LoadingDots";
 export { WaveformVisualizer } from "./WaveformVisualizer";
+export { TechTooltip } from "./TechTooltip";
+export { RadarScan } from "./RadarScan";
+export { TechInput } from "./TechInput";
+export { SystemStats } from "./SystemStats";
