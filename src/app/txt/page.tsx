@@ -13,7 +13,7 @@ import {
   RadarScan,
   LoadingDots,
   GlitchText,
-  WaveText,
+  CyberText,
   PixelText,
 } from "@/components/ui/tech";
 import {
@@ -126,7 +126,7 @@ const TxtPage = () => {
             <div className="h-4 w-px bg-border" />
             <div className="flex items-center gap-2">
               <FileText className="w-4 h-4 text-[#00d4ff]" />
-              <WaveText className="text-sm font-bold" color="#00d4ff" waveHeight={3} speed={80}>TXT_STORAGE</WaveText>
+              <CyberText className="text-sm font-bold">TXT_STORAGE</CyberText>
             </div>
           </div>
           <div className="flex items-center gap-3">

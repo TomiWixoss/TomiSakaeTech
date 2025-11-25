@@ -12,7 +12,8 @@ import {
   NeonBorder,
   CyberText,
   HackerText,
-  MatrixText,
+  VoidText,
+  VoidZone,
 } from "@/components/ui/tech";
 import { HardDrive, FileText, Lock, ChevronLeft, ChevronRight, Database } from "lucide-react";
 
@@ -176,98 +177,100 @@ export default function Home() {
               className="w-screen h-screen flex items-center justify-center p-8"
             >
               <div className="max-w-lg w-full">
-                {/* World Card */}
-                <div
-                  className={`relative border-2 p-8 transition-all duration-300 cursor-pointer group ${
-                    world.status === "available"
-                      ? "border-current"
-                      : "border-muted-foreground/30 opacity-60"
-                  }`}
-                  style={{ 
-                    borderColor: world.status === "available" ? world.color : undefined,
-                    ['--shadow-color' as string]: world.color,
-                  }}
-                  onMouseEnter={(e) => {
-                    if (world.status === "available") {
-                      e.currentTarget.style.boxShadow = `0 0 30px ${world.color}4D`;
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow = '';
-                  }}
-                  onClick={() => handleEnterWorld(world)}
-                >
-                  {/* Corner accents */}
-                  <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2" style={{ borderColor: world.color }} />
-                  <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2" style={{ borderColor: world.color }} />
-                  <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2" style={{ borderColor: world.color }} />
-                  <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2" style={{ borderColor: world.color }} />
+                {/* World Card - Wrap with VoidZone for coming_soon */}
+                <VoidZone active={world.status === "coming_soon"} intensity="medium">
+                  <div
+                    className={`relative border-2 p-8 transition-all duration-300 cursor-pointer group ${
+                      world.status === "available"
+                        ? "border-current"
+                        : "border-muted-foreground/30"
+                    }`}
+                    style={{ 
+                      borderColor: world.status === "available" ? world.color : undefined,
+                      ['--shadow-color' as string]: world.color,
+                    }}
+                    onMouseEnter={(e) => {
+                      if (world.status === "available") {
+                        e.currentTarget.style.boxShadow = `0 0 30px ${world.color}4D`;
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.boxShadow = '';
+                    }}
+                    onClick={() => handleEnterWorld(world)}
+                  >
+                    {/* Corner accents */}
+                    <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2" style={{ borderColor: world.color }} />
+                    <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2" style={{ borderColor: world.color }} />
+                    <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2" style={{ borderColor: world.color }} />
+                    <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2" style={{ borderColor: world.color }} />
 
-                  {/* Icon */}
-                  <div className="flex justify-center mb-6">
-                    <div className="relative">
-                      <PulseRing color={world.color} size={100} rings={world.status === "available" ? 3 : 0} speed={3} />
-                      <div className="absolute inset-0 flex items-center justify-center" style={{ color: world.color }}>
-                        {world.icon}
+                    {/* Icon */}
+                    <div className="flex justify-center mb-6">
+                      <div className="relative">
+                        <PulseRing color={world.color} size={100} rings={world.status === "available" ? 3 : 0} speed={3} />
+                        <div className="absolute inset-0 flex items-center justify-center" style={{ color: world.color }}>
+                          {world.icon}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Title */}
-                  <div className="text-center mb-4">
-                    {world.status === "available" ? (
-                      <HackerText className="text-2xl font-bold mb-1" color={world.color} triggerOnHover>
-                        {world.title}
-                      </HackerText>
-                    ) : (
-                      <MatrixText className="text-2xl font-bold mb-1" color="#666666" continuous>
-                        {world.title}
-                      </MatrixText>
+                    {/* Title */}
+                    <div className="text-center mb-4">
+                      {world.status === "available" ? (
+                        <HackerText className="text-2xl font-bold mb-1" color={world.color} triggerOnHover>
+                          {world.title}
+                        </HackerText>
+                      ) : (
+                        <VoidText className="text-2xl font-bold mb-1" color="#555555" voidColor="#111111">
+                          {world.title}
+                        </VoidText>
+                      )}
+                      <p className="text-xs text-muted-foreground font-mono">{world.subtitle}</p>
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-sm text-muted-foreground text-center mb-6 leading-relaxed">
+                      {world.description}
+                    </p>
+
+                    {/* Stats */}
+                    {world.stats && (
+                      <div className="grid grid-cols-2 gap-4 mb-6">
+                        {world.stats.map((stat) => (
+                          <div key={stat.label} className="text-center p-3 bg-muted/20 border border-border">
+                            <p className="text-[10px] text-muted-foreground font-mono mb-1">{stat.label}</p>
+                            <p className="text-sm font-mono font-bold" style={{ color: world.color }}>{stat.value}</p>
+                          </div>
+                        ))}
+                      </div>
                     )}
-                    <p className="text-xs text-muted-foreground font-mono">{world.subtitle}</p>
-                  </div>
 
-                  {/* Description */}
-                  <p className="text-sm text-muted-foreground text-center mb-6 leading-relaxed">
-                    {world.description}
-                  </p>
+                    {/* Enter Button */}
+                    {world.status === "available" ? (
+                      <NeonBorder color={world.color} intensity="medium" animated>
+                        <button className="w-full py-4 font-mono text-sm font-bold tracking-wider transition-colors hover:bg-white/5">
+                          ENTER_WORLD →
+                        </button>
+                      </NeonBorder>
+                    ) : (
+                      <div className="w-full py-4 text-center font-mono text-sm text-muted-foreground border border-dashed border-muted-foreground/30">
+                        COMING_SOON
+                      </div>
+                    )}
 
-                  {/* Stats */}
-                  {world.stats && (
-                    <div className="grid grid-cols-2 gap-4 mb-6">
-                      {world.stats.map((stat) => (
-                        <div key={stat.label} className="text-center p-3 bg-muted/20 border border-border">
-                          <p className="text-[10px] text-muted-foreground font-mono mb-1">{stat.label}</p>
-                          <p className="text-sm font-mono font-bold" style={{ color: world.color }}>{stat.value}</p>
-                        </div>
-                      ))}
+                    {/* Status Badge */}
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <TechBadge
+                        variant={world.status === "available" ? "success" : "warning"}
+                        size="sm"
+                        pulse={world.status === "available"}
+                      >
+                        {world.status === "available" ? "ONLINE" : "OFFLINE"}
+                      </TechBadge>
                     </div>
-                  )}
-
-                  {/* Enter Button */}
-                  {world.status === "available" ? (
-                    <NeonBorder color={world.color} intensity="medium" animated>
-                      <button className="w-full py-4 font-mono text-sm font-bold tracking-wider transition-colors hover:bg-white/5">
-                        ENTER_WORLD →
-                      </button>
-                    </NeonBorder>
-                  ) : (
-                    <div className="w-full py-4 text-center font-mono text-sm text-muted-foreground border border-dashed border-muted-foreground/30">
-                      COMING_SOON
-                    </div>
-                  )}
-
-                  {/* Status Badge */}
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <TechBadge
-                      variant={world.status === "available" ? "success" : "warning"}
-                      size="sm"
-                      pulse={world.status === "available"}
-                    >
-                      {world.status === "available" ? "ONLINE" : "OFFLINE"}
-                    </TechBadge>
                   </div>
-                </div>
+                </VoidZone>
 
                 {/* World Index */}
                 <div className="text-center mt-6">

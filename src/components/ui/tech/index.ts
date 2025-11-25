@@ -35,3 +35,5 @@ export { NeonText } from "./NeonText";
 export { HackerText } from "./HackerText";
 export { MatrixText } from "./MatrixText";
 export { CyberText } from "./CyberText";
+export { VoidText } from "./VoidText";
+export { VoidZone } from "./VoidZone";
