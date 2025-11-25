@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +15,8 @@ import {
   PulseRing,
 } from "@/components/ui/tech";
 import { FileTechIcon } from "@/components/icons/TechIcons";
-import { X, Download, ExternalLink, Copy, Check } from "lucide-react";
+import { Download, ExternalLink, Copy, Check } from "lucide-react";
+import Image from "next/image";
 import { toast } from "react-hot-toast";
 
 interface FilePreviewDialogProps {
@@ -49,17 +50,7 @@ export const FilePreviewDialog: React.FC<FilePreviewDialogProps> = ({
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    if (isOpen && fileId) {
-      fetchPreview();
-    }
-    return () => {
-      setPreviewData(null);
-      setIsLoading(true);
-    };
-  }, [isOpen, fileId]);
-
-  const fetchPreview = async () => {
+  const fetchPreview = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await fetch(`/api/drive/preview?fileId=${fileId}`);
@@ -76,7 +67,17 @@ export const FilePreviewDialog: React.FC<FilePreviewDialogProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [fileId, fileName]);
+
+  useEffect(() => {
+    if (isOpen && fileId) {
+      fetchPreview();
+    }
+    return () => {
+      setPreviewData(null);
+      setIsLoading(true);
+    };
+  }, [isOpen, fileId, fetchPreview]);
 
   const handleCopyContent = () => {
     if (previewData?.content) {
@@ -92,20 +93,6 @@ export const FilePreviewDialog: React.FC<FilePreviewDialogProps> = ({
     if (size < 1024) return `${size} B`;
     if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
     return `${(size / (1024 * 1024)).toFixed(1)} MB`;
-  };
-
-  const getLanguageFromMimeType = (mimeType: string): string => {
-    const map: Record<string, string> = {
-      "application/json": "json",
-      "text/javascript": "javascript",
-      "application/javascript": "javascript",
-      "text/html": "html",
-      "text/css": "css",
-      "text/markdown": "markdown",
-      "text/xml": "xml",
-      "application/xml": "xml",
-    };
-    return map[mimeType] || "plaintext";
   };
 
   const renderPreview = () => {
@@ -160,14 +147,14 @@ export const FilePreviewDialog: React.FC<FilePreviewDialogProps> = ({
 
       case "image":
         return (
-          <div className="flex items-center justify-center p-4">
-            <img
-              src={previewData.streamUrl || ""}
+          <div className="flex items-center justify-center p-4 relative min-h-[200px]">
+            <Image
+              src={previewData.streamUrl || previewData.thumbnailLink || ""}
               alt={previewData.name}
-              className="max-w-full max-h-[60vh] object-contain"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = previewData.thumbnailLink || "";
-              }}
+              width={800}
+              height={600}
+              className="max-w-full max-h-[60vh] object-contain w-auto h-auto"
+              unoptimized
             />
           </div>
         );

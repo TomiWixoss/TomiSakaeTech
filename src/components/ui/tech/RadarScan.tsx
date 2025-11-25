@@ -18,9 +18,10 @@ export const RadarScan: React.FC<RadarScanProps> = ({
   const scanRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!scanRef.current) return;
+    const scanElement = scanRef.current;
+    if (!scanElement) return;
 
-    gsap.to(scanRef.current, {
+    gsap.to(scanElement, {
       rotation: 360,
       duration: speed,
       repeat: -1,
@@ -28,7 +29,7 @@ export const RadarScan: React.FC<RadarScanProps> = ({
     });
 
     return () => {
-      gsap.killTweensOf(scanRef.current);
+      gsap.killTweensOf(scanElement);
     };
   }, [speed]);
 

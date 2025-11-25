@@ -223,6 +223,12 @@ export const useFileList = ({
 
   // Track folder IDs đã check để tránh gọi API lặp lại
   const checkedFolderIds = useRef<Set<string>>(new Set());
+  const onCheckFolderContentRef = useRef(onCheckFolderContent);
+  
+  // Keep ref updated
+  useEffect(() => {
+    onCheckFolderContentRef.current = onCheckFolderContent;
+  }, [onCheckFolderContent]);
   
   useEffect(() => {
     const checkFolders = async () => {
@@ -234,17 +240,17 @@ export const useFileList = ({
       
       if (foldersToCheck.length === 0) return;
       
-      const results: { [key: string]: boolean } = { ...hasFolders };
+      const results: { [key: string]: boolean } = {};
       
       for (const file of foldersToCheck) {
         checkedFolderIds.current.add(file.id);
-        results[file.id] = await onCheckFolderContent(file.id);
+        results[file.id] = await onCheckFolderContentRef.current(file.id);
       }
       
-      setHasFolders(results);
+      setHasFolders(prev => ({ ...prev, ...results }));
     };
     checkFolders();
-  }, [files]); // Chỉ depend vào files, không depend vào onCheckFolderContent
+  }, [files]);
 
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();

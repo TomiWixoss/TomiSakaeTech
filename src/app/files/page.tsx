@@ -319,7 +319,7 @@ export default function FilesPage() {
                   <HackerText className="text-lg font-bold text-[#00ff88]" color="#00ff88" speed={50} triggerOnHover={false}>
                     NEW_FOLDER
                   </HackerText>
-                  <p className="text-[10px] text-[#00ff88]/60 font-mono mt-1">// INITIALIZE_DIRECTORY</p>
+                  <p className="text-[10px] text-[#00ff88]/60 font-mono mt-1">{/* INITIALIZE_DIRECTORY */}</p>
                 </div>
               </DialogTitle>
             </DialogHeader>
