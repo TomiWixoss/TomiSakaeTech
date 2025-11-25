@@ -1,6 +1,5 @@
 "use client";
-import React, { useState, useRef, useEffect, useMemo } from "react";
-import { useTheme } from "next-themes";
+import React from "react";
 import { toast } from "react-hot-toast";
 import { useFileList } from "./hooks/file-list";
 import { FileListProps } from "../types";
@@ -21,8 +20,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Progress } from "@/components/ui/progress";
 import {
   Folder,
   File,
@@ -59,8 +56,6 @@ export default function FileList({
   onCheckFolderContent,
   onDelete,
 }: FileListProps) {
-  const { theme } = useTheme();
-
   const {
     files: sortedFiles,
     uniqueExtensions,
@@ -73,7 +68,6 @@ export default function FileList({
     isDragging,
     compressingFolder,
     compressionProgress,
-    hasFolders,
     openMenuId,
     showDeleteModal,
     deletePassword,
@@ -97,7 +91,6 @@ export default function FileList({
     setDeletePassword,
     setShowDeleteModal,
     setFileToDelete,
-    setIsDeleting,
   } = useFileList({
     files,
     isLoading,
@@ -116,316 +109,323 @@ export default function FileList({
 
   return (
     <div
-      className="flex-1 flex flex-col overflow-hidden bg-background min-h-0"
+      className="flex-1 flex flex-col overflow-hidden bg-background"
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
-      {/* Drag & Drop Overlay */}
+      {/* Drag Overlay */}
       {isDragging && (
-        <div
-          className="absolute inset-0 bg-primary/5 backdrop-blur-sm border-2 border-dashed 
-                    border-primary rounded-xl flex items-center justify-center transition-all duration-300 z-50"
-        >
-          <div className="text-center bg-background p-6 rounded-xl shadow-lg">
-            <UploadCloud className="mx-auto h-12 w-12 text-primary animate-bounce" />
-            <p className="mt-4 text-sm font-medium text-primary">
-              Thả file hoặc thư mục để tải lên
-            </p>
+        <div className="absolute inset-0 bg-background/95 border-2 border-dashed border-foreground flex items-center justify-center z-50">
+          <div className="text-center">
+            <UploadCloud className="mx-auto w-12 h-12 text-muted-foreground mb-4" />
+            <p className="text-sm text-muted-foreground">Thả file để tải lên</p>
           </div>
         </div>
       )}
 
-      {/* Breadcrumb Navigation */}
-      <div className="p-2 md:p-4 md:pb-2">
+      {/* Toolbar */}
+      <div className="border-b px-6 py-3">
+        {/* Breadcrumb */}
         {currentFolderId && (
-          <div className="flex items-center space-x-1 md:space-x-2 text-xs md:text-sm mb-2 overflow-x-auto whitespace-nowrap">
-            <Button
-              variant="link"
-              className="p-0 h-auto text-primary font-medium"
+          <div className="flex items-center gap-1 text-sm mb-3 overflow-x-auto">
+            <button
               onClick={() => onBackClick()}
+              className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
             >
               DA22TTC
-            </Button>
+            </button>
             {folderPath.map((folder, index) => (
               <React.Fragment key={folder.id}>
-                <ChevronRight className="w-3 h-3 md:w-4 md:h-4 text-muted-foreground flex-shrink-0" />
-                <Button
-                  variant="link"
-                  className="p-0 h-auto text-primary font-medium truncate max-w-[80px] md:max-w-[200px]"
+                <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0" />
+                <button
                   onClick={() => onBreadcrumbClick(folder.id, index)}
+                  className="text-muted-foreground hover:text-foreground transition-colors truncate max-w-[150px]"
                 >
                   {folder.name}
-                </Button>
+                </button>
               </React.Fragment>
             ))}
             {currentFolderName && (
               <>
-                <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                <span className="text-foreground font-medium truncate max-w-[100px] md:max-w-[200px]">
-                  {currentFolderName}
-                </span>
+                <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0" />
+                <span className="text-foreground truncate max-w-[150px]">{currentFolderName}</span>
               </>
             )}
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2 justify-between">
-          {currentFolderId && (
-            <Button variant="outline" onClick={onBackClick} className="gap-2">
-              <ArrowLeft className="w-4 h-4" />
-              <span className="hidden md:inline">Quay lại</span>
-            </Button>
-          )}
+        {/* Actions */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            {currentFolderId && (
+              <button
+                onClick={onBackClick}
+                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Quay lại</span>
+              </button>
+            )}
+          </div>
 
           {!isLoading && (
-            <div
-              className={`flex flex-wrap items-center gap-2 ${
-                currentFolderId ? "" : "ml-auto"
-              }`}
-            >
-              {/* Nút ẩn/hiện thư mục */}
-              <Button
-                variant="outline"
+            <div className="flex items-center gap-1">
+              {/* Toggle Folders */}
+              <button
                 onClick={() => setShowFolders(!showFolders)}
-                title={showFolders ? "Ẩn thư mục" : "Hiện thư mục"}
-                className="gap-2"
-              >
-                {showFolders ? (
-                  <Eye className="w-4 h-4" />
-                ) : (
-                  <EyeOff className="w-4 h-4 text-muted-foreground" />
+                className={cn(
+                  "p-2 transition-colors",
+                  showFolders ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                 )}
-                <span className="hidden md:inline">
-                  {showFolders ? "Ẩn thư mục" : "Hiện thư mục"}
-                </span>
-              </Button>
+                title={showFolders ? "Ẩn thư mục" : "Hiện thư mục"}
+              >
+                {showFolders ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+              </button>
 
-              {/* Dropdown bộ lọc đuôi file */}
+              {/* Filter Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="gap-2">
+                  <button className="flex items-center gap-1 p-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
                     <Filter className="w-4 h-4" />
-                    <span className="hidden md:inline">
-                      {selectedExtension
-                        ? `.${selectedExtension}`
-                        : "Loại file"}
+                    <span className="hidden sm:inline">
+                      {selectedExtension ? `.${selectedExtension}` : "Loại"}
                     </span>
-                    <ChevronDown className="w-4 h-4 hidden md:inline" />
-                  </Button>
+                    <ChevronDown className="w-3 h-3" />
+                  </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem onClick={() => setSelectedExtension(null)}>
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        selectedExtension === null ? "opacity-100" : "opacity-0"
-                      )}
-                    />
+                <DropdownMenuContent align="end" className="w-40 rounded-none border-border">
+                  <DropdownMenuItem onClick={() => setSelectedExtension(null)} className="text-sm">
+                    <Check className={cn("mr-2 w-3 h-3", !selectedExtension ? "opacity-100" : "opacity-0")} />
                     Tất cả
                   </DropdownMenuItem>
                   {uniqueExtensions.map((ext) => (
-                    <DropdownMenuItem
-                      key={ext}
-                      onClick={() => setSelectedExtension(ext)}
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          selectedExtension === ext
-                            ? "opacity-100"
-                            : "opacity-0"
-                        )}
-                      />
+                    <DropdownMenuItem key={ext} onClick={() => setSelectedExtension(ext)} className="text-sm">
+                      <Check className={cn("mr-2 w-3 h-3", selectedExtension === ext ? "opacity-100" : "opacity-0")} />
                       .{ext}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Dropdown bộ lọc sắp xếp */}
+              {/* Sort Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="gap-2">
+                  <button className="flex items-center gap-1 p-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
                     <ArrowUpDown className="w-4 h-4" />
-                    <span className="hidden md:inline">Sắp xếp</span>
-                    <ChevronDown className="w-4 h-4 hidden md:inline" />
-                  </Button>
+                    <span className="hidden sm:inline">Sắp xếp</span>
+                    <ChevronDown className="w-3 h-3" />
+                  </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem
-                    onClick={() => setSortCriteria(SortCriteria.Default)}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        sortCriteria === SortCriteria.Default
-                          ? "opacity-100"
-                          : "opacity-0"
-                      )}
-                    />
+                <DropdownMenuContent align="end" className="w-40 rounded-none border-border">
+                  <DropdownMenuItem onClick={() => setSortCriteria(SortCriteria.Default)} className="text-sm">
+                    <Check className={cn("mr-2 w-3 h-3", sortCriteria === SortCriteria.Default ? "opacity-100" : "opacity-0")} />
                     Mặc định
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setSortCriteria(SortCriteria.Name)}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        sortCriteria === SortCriteria.Name
-                          ? "opacity-100"
-                          : "opacity-0"
-                      )}
-                    />
+                  <DropdownMenuItem onClick={() => setSortCriteria(SortCriteria.Name)} className="text-sm">
+                    <Check className={cn("mr-2 w-3 h-3", sortCriteria === SortCriteria.Name ? "opacity-100" : "opacity-0")} />
                     Tên
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setSortCriteria(SortCriteria.Size)}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        sortCriteria === SortCriteria.Size
-                          ? "opacity-100"
-                          : "opacity-0"
-                      )}
-                    />
+                  <DropdownMenuItem onClick={() => setSortCriteria(SortCriteria.Size)} className="text-sm">
+                    <Check className={cn("mr-2 w-3 h-3", sortCriteria === SortCriteria.Size ? "opacity-100" : "opacity-0")} />
                     Dung lượng
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setSortCriteria(SortCriteria.Date)}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        sortCriteria === SortCriteria.Date
-                          ? "opacity-100"
-                          : "opacity-0"
-                      )}
-                    />
+                  <DropdownMenuItem onClick={() => setSortCriteria(SortCriteria.Date)} className="text-sm">
+                    <Check className={cn("mr-2 w-3 h-3", sortCriteria === SortCriteria.Date ? "opacity-100" : "opacity-0")} />
                     Ngày tạo
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Nút chuyển đổi grid/list view */}
-              <Button
-                variant="outline"
-                size="icon"
+              {/* View Toggle */}
+              <button
                 onClick={() => setIsGridView(!isGridView)}
+                className="p-2 text-muted-foreground hover:text-foreground transition-colors"
               >
-                {isGridView ? (
-                  <List className="w-4 h-4" />
-                ) : (
-                  <LayoutGrid className="w-4 h-4" />
-                )}
-              </Button>
+                {isGridView ? <List className="w-4 h-4" /> : <LayoutGrid className="w-4 h-4" />}
+              </button>
             </div>
           )}
         </div>
       </div>
 
-      {/* File Grid/List với khả năng cuộn */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-6 pb-8">
-        <div
-          className={`
-                    grid gap-2 py-2
-                    ${
-                      isGridView
-                        ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                        : "grid-cols-1"
-                    }
-                `}
-        >
-          {isLoading ? (
-            [...Array(5)].map((_, index) => (
-              <div
-                key={index}
-                className="bg-card p-4 rounded-xl shadow-sm border"
-              >
-                <div className="flex items-center">
-                  <Skeleton className="h-6 w-6 rounded-full mr-3" />
-                  <Skeleton className="h-5 w-[200px]" />
-                </div>
-              </div>
-            ))
-          ) : sortedFiles.length === 0 ? (
-            <div
-              className="col-span-full flex flex-col items-center justify-center py-16 
-                            bg-card rounded-xl border border-dashed"
-            >
-              <Folder className="w-16 h-16 mb-4 text-muted-foreground" />
-              <p className="text-lg font-medium text-foreground">
-                Thư mục trống
-              </p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Chưa có tệp tin hoặc thư mục nào
-              </p>
-            </div>
-          ) : (
-            sortedFiles.map((file) => (
-              <div
-                key={file.id}
-                className={cn(
-                  "bg-card rounded-xl border shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group relative",
-                  file.isUploading ? "opacity-80 pointer-events-none" : ""
-                )}
-                onClick={() =>
-                  file.mimeType === "application/vnd.google-apps.folder"
-                    ? onFolderClick(file.id)
-                    : null
-                }
-                onMouseLeave={handleMouseLeave}
-              >
-                <div className="p-4">
-                  <div className="flex items-center">
-                    {/* File/Folder Icon */}
-                    {file.mimeType === "application/vnd.google-apps.folder" ? (
-                      <Folder className="w-10 h-10 text-blue-500 mr-3 fill-current" />
-                    ) : (
-                      <File className="w-10 h-10 text-muted-foreground mr-3" />
-                    )}
-
-                    {/* File/Folder Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-foreground truncate">
-                        {file.name}
-                      </div>
-                      <div className="flex items-center text-xs text-muted-foreground mt-1 space-x-4">
-                        <span>
-                          {new Date(file.createdTime).toLocaleDateString(
-                            "vi-VN"
-                          )}
-                        </span>
-                        {file.size && <span>{formatFileSize(file.size)}</span>}
-                      </div>
+      {/* File List */}
+      <div className="flex-1 overflow-y-auto">
+        {isLoading ? (
+          <div className="p-6">
+            <div className={cn(
+              "gap-px bg-border",
+              isGridView ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "space-y-px"
+            )}>
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="bg-background p-4 animate-pulse">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-muted" />
+                    <div className="flex-1">
+                      <div className="h-4 w-32 bg-muted mb-2" />
+                      <div className="h-3 w-20 bg-muted" />
                     </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : sortedFiles.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full py-24">
+            <Folder className="w-12 h-12 text-muted-foreground mb-4" />
+            <p className="text-sm text-muted-foreground">Thư mục trống</p>
+          </div>
+        ) : (
+          <div className="p-6">
+            {isGridView ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-px bg-border border border-border">
+                {sortedFiles.map((file) => (
+                  <article
+                    key={file.id}
+                    className={cn(
+                      "group bg-background p-4 cursor-pointer transition-colors hover:bg-muted/50",
+                      file.isUploading && "opacity-60 pointer-events-none"
+                    )}
+                    onClick={() =>
+                      file.mimeType === "application/vnd.google-apps.folder"
+                        ? onFolderClick(file.id)
+                        : null
+                    }
+                    onMouseLeave={handleMouseLeave}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      {file.mimeType === "application/vnd.google-apps.folder" ? (
+                        <Folder className="w-8 h-8 text-foreground" />
+                      ) : (
+                        <File className="w-8 h-8 text-muted-foreground" />
+                      )}
 
-                    {/* Download Button */}
-                    {!file.isUploading && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <MoreVertical className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {file.mimeType !==
-                            "application/vnd.google-apps.folder" && (
+                      {!file.isUploading && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button
+                              className="p-1 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <MoreVertical className="w-4 h-4" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-40 rounded-none border-border">
+                            {file.mimeType !== "application/vnd.google-apps.folder" && (
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigator.clipboard.writeText(generateDownloadLink(file.id));
+                                  toast.success("Đã sao chép link");
+                                }}
+                                className="text-sm"
+                              >
+                                <Copy className="w-4 h-4 mr-2" />
+                                Sao chép link
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem
                               onClick={(e) => {
                                 e.stopPropagation();
-                                const link = generateDownloadLink(file.id);
-                                navigator.clipboard.writeText(link);
-                                toast.success("Đã sao chép link tải file!");
+                                file.mimeType === "application/vnd.google-apps.folder"
+                                  ? handleDownloadFolder(file.id, file.name)
+                                  : onDownload(file.id, file.name);
                               }}
+                              className="text-sm"
+                            >
+                              <Download className="w-4 h-4 mr-2" />
+                              Tải xuống
+                            </DropdownMenuItem>
+                            {isAdminMode && (
+                              <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  className="text-sm text-destructive focus:text-destructive"
+                                  onClick={(e) => handleDelete(e, file)}
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  Xóa
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </div>
+
+                    <div className="text-sm font-medium truncate mb-1">{file.name}</div>
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span>{new Date(file.createdTime).toLocaleDateString("vi-VN")}</span>
+                      {file.size && <span>{formatFileSize(file.size)}</span>}
+                    </div>
+
+                    {(file.isUploading || compressingFolder === file.id) && (
+                      <div className="mt-3">
+                        <div className="h-1 bg-muted overflow-hidden">
+                          <div
+                            className="h-full bg-foreground transition-all"
+                            style={{ width: `${file.isUploading ? file.uploadProgress : compressionProgress}%` }}
+                          />
+                        </div>
+                        <div className="text-xs text-muted-foreground text-right mt-1">
+                          {file.isUploading ? file.uploadProgress : compressionProgress}%
+                        </div>
+                      </div>
+                    )}
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="border border-border divide-y divide-border">
+                {sortedFiles.map((file) => (
+                  <article
+                    key={file.id}
+                    className={cn(
+                      "group flex items-center gap-4 p-4 cursor-pointer transition-colors hover:bg-muted/50",
+                      file.isUploading && "opacity-60 pointer-events-none"
+                    )}
+                    onClick={() =>
+                      file.mimeType === "application/vnd.google-apps.folder"
+                        ? onFolderClick(file.id)
+                        : null
+                    }
+                    onMouseLeave={handleMouseLeave}
+                  >
+                    {file.mimeType === "application/vnd.google-apps.folder" ? (
+                      <Folder className="w-6 h-6 text-foreground shrink-0" />
+                    ) : (
+                      <File className="w-6 h-6 text-muted-foreground shrink-0" />
+                    )}
+
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium truncate">{file.name}</div>
+                    </div>
+
+                    <div className="hidden sm:flex items-center gap-6 text-xs text-muted-foreground shrink-0">
+                      <span className="w-24">{new Date(file.createdTime).toLocaleDateString("vi-VN")}</span>
+                      <span className="w-20 text-right">{file.size ? formatFileSize(file.size) : "—"}</span>
+                    </div>
+
+                    {!file.isUploading && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            className="p-1 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground shrink-0"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <MoreVertical className="w-4 h-4" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40 rounded-none border-border">
+                          {file.mimeType !== "application/vnd.google-apps.folder" && (
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigator.clipboard.writeText(generateDownloadLink(file.id));
+                                toast.success("Đã sao chép link");
+                              }}
+                              className="text-sm"
                             >
                               <Copy className="w-4 h-4 mr-2" />
                               Sao chép link
@@ -434,11 +434,11 @@ export default function FileList({
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              file.mimeType ===
-                              "application/vnd.google-apps.folder"
+                              file.mimeType === "application/vnd.google-apps.folder"
                                 ? handleDownloadFolder(file.id, file.name)
                                 : onDownload(file.id, file.name);
                             }}
+                            className="text-sm"
                           >
                             <Download className="w-4 h-4 mr-2" />
                             Tải xuống
@@ -447,70 +447,61 @@ export default function FileList({
                             <>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
-                                className="text-destructive focus:text-destructive"
+                                className="text-sm text-destructive focus:text-destructive"
                                 onClick={(e) => handleDelete(e, file)}
                               >
                                 <Trash2 className="w-4 h-4 mr-2" />
-                                Xóa vĩnh viễn
+                                Xóa
                               </DropdownMenuItem>
                             </>
                           )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     )}
-                  </div>
 
-                  {/* Upload Progress */}
-                  {(file.isUploading || compressingFolder === file.id) && (
-                    <div className="mt-4">
-                      <Progress
-                        value={
-                          file.isUploading
-                            ? file.uploadProgress
-                            : compressionProgress
-                        }
-                        className="h-2"
-                      />
-                      <div className="text-xs font-medium text-muted-foreground text-right mt-1">
-                        {file.isUploading
-                          ? file.uploadProgress
-                          : compressionProgress}
-                        %
+                    {(file.isUploading || compressingFolder === file.id) && (
+                      <div className="w-24 shrink-0">
+                        <div className="h-1 bg-muted overflow-hidden">
+                          <div
+                            className="h-full bg-foreground transition-all"
+                            style={{ width: `${file.isUploading ? file.uploadProgress : compressionProgress}%` }}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </article>
+                ))}
               </div>
-            ))
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
 
+      {/* Delete Dialog */}
       <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md rounded-none border-border">
           <DialogHeader>
-            <DialogTitle>Xác nhận xóa vĩnh viễn</DialogTitle>
-            <DialogDescription>
-              Bạn có chắc chắn muốn xóa &quot;{fileToDelete?.name}&quot;? Hành
-              động này không thể hoàn tác.
+            <DialogTitle className="text-lg font-normal">Xóa vĩnh viễn</DialogTitle>
+            <DialogDescription className="text-sm">
+              Xóa &quot;{fileToDelete?.name}&quot;? Không thể hoàn tác.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4">
-            <Input
-              type="password"
-              placeholder="Nhập mật khẩu admin"
-              value={deletePassword}
-              onChange={(e) => setDeletePassword(e.target.value)}
-            />
-          </div>
-          <DialogFooter>
+          <Input
+            type="password"
+            placeholder="Mật khẩu admin"
+            value={deletePassword}
+            onChange={(e) => setDeletePassword(e.target.value)}
+            className="rounded-none border-border"
+          />
+          <DialogFooter className="gap-2">
             <Button
-              variant="outline"
+              variant="ghost"
               onClick={() => {
                 setShowDeleteModal(false);
                 setDeletePassword("");
                 setFileToDelete(null);
               }}
+              className="rounded-none"
             >
               Hủy
             </Button>
@@ -518,6 +509,7 @@ export default function FileList({
               variant="destructive"
               onClick={confirmDelete}
               disabled={isDeleting || !deletePassword}
+              className="rounded-none"
             >
               {isDeleting ? "Đang xóa..." : "Xóa"}
             </Button>

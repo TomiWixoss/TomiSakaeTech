@@ -13,7 +13,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Toaster } from "react-hot-toast";
-import { useTheme } from "next-themes";
 import useDrive from "../components/hooks/drive";
 import { Menu } from "lucide-react";
 
@@ -52,121 +51,114 @@ export default function Home() {
     handleReloadCache,
     isReloading,
   } = useDrive();
-  const { theme } = useTheme();
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-background">
       <Toaster
-        position="top-center"
-        containerStyle={{
-          top: "20px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 10000,
-        }}
+        position="bottom-center"
         toastOptions={{
           style: {
-            background: theme === "dark" ? "#374151" : "#fff",
-            color: theme === "dark" ? "#fff" : "#000",
-            border:
-              theme === "dark" ? "1px solid #4B5563" : "1px solid #E5E7EB",
+            background: "hsl(var(--foreground))",
+            color: "hsl(var(--background))",
+            borderRadius: 0,
+            fontSize: "13px",
           },
         }}
       />
 
-      <div className="max-w-[1800px] w-full mx-auto flex flex-col flex-1 overflow-hidden">
-        <div className="md:hidden p-4 border-b">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          >
-            <Menu className="w-6 h-6" />
-          </Button>
-        </div>
-
-        <Header
-          searchTerm={searchTerm}
-          onSearchChange={handleSearchChange}
-          isAISearch={isAISearch}
-          onToggleAISearch={handleToggleAISearch}
-          onSearch={handleSearchClick}
-          onReloadCache={handleReloadCache}
-          isReloading={isReloading}
-        />
-
-        <div className="flex flex-1 overflow-hidden">
-          <Sidebar
-            driveInfo={driveInfo}
-            onCreateFolder={handleCreateFolder}
-            onUploadFile={handleUploadFile}
-            onUploadFolder={handleUploadFolder}
-            formatBytes={formatBytes}
-            isOpen={isSidebarOpen}
-            onClose={() => setIsSidebarOpen(false)}
-            fileInputRef={React.useRef<HTMLInputElement>(null)}
-            isLoading={isSidebarLoading}
-          />
-
-          <FileList
-            files={files}
-            isLoading={isLoading}
-            currentFolderId={currentFolderId}
-            currentFolderName={currentFolderName}
-            folderPath={folderPath}
-            onFolderClick={(id) => {
-              const folder = files.find((f) => f.id === id);
-              handleFolderClick(id, folder?.name);
-            }}
-            onBreadcrumbClick={handleBreadcrumbClick}
-            onBackClick={handleBackClick}
-            onDownload={handleDownload}
-            onUploadFile={handleUploadFile}
-            onUploadFolder={handleUploadFolder}
-            onCheckFolderContent={checkFolderContent}
-            onDelete={handleDelete}
-          />
-        </div>
+      {/* Mobile Menu Button */}
+      <div className="md:hidden flex items-center h-14 px-4 border-b">
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        <span className="ml-3 text-sm font-medium">DA22TTC</span>
       </div>
 
+      <Header
+        searchTerm={searchTerm}
+        onSearchChange={handleSearchChange}
+        isAISearch={isAISearch}
+        onToggleAISearch={handleToggleAISearch}
+        onSearch={handleSearchClick}
+        onReloadCache={handleReloadCache}
+        isReloading={isReloading}
+      />
+
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar
+          driveInfo={driveInfo}
+          onCreateFolder={handleCreateFolder}
+          onUploadFile={handleUploadFile}
+          onUploadFolder={handleUploadFolder}
+          formatBytes={formatBytes}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          fileInputRef={React.useRef<HTMLInputElement>(null)}
+          isLoading={isSidebarLoading}
+        />
+
+        <FileList
+          files={files}
+          isLoading={isLoading}
+          currentFolderId={currentFolderId}
+          currentFolderName={currentFolderName}
+          folderPath={folderPath}
+          onFolderClick={(id) => {
+            const folder = files.find((f) => f.id === id);
+            handleFolderClick(id, folder?.name);
+          }}
+          onBreadcrumbClick={handleBreadcrumbClick}
+          onBackClick={handleBackClick}
+          onDownload={handleDownload}
+          onUploadFile={handleUploadFile}
+          onUploadFolder={handleUploadFolder}
+          onCheckFolderContent={checkFolderContent}
+          onDelete={handleDelete}
+        />
+      </div>
+
+      {/* Create Folder Dialog */}
       <Dialog
         open={isCreateFolderModalOpen}
         onOpenChange={(open) => {
           if (!isCreatingFolder) setIsCreateFolderModalOpen(open);
         }}
       >
-        <DialogContent>
+        <DialogContent className="sm:max-w-md rounded-none border-border">
           <DialogHeader>
-            <DialogTitle>Tạo thư mục mới</DialogTitle>
+            <DialogTitle className="text-lg font-normal">Tạo thư mục mới</DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleCreateFolderSubmit}>
-            <div className="py-4">
-              <Input
-                type="text"
-                value={newFolderName}
-                onChange={(e) => setNewFolderName(e.target.value)}
-                placeholder="Nhập tên thư mục"
-                disabled={isCreatingFolder}
-              />
-            </div>
+            <Input
+              type="text"
+              value={newFolderName}
+              onChange={(e) => setNewFolderName(e.target.value)}
+              placeholder="Tên thư mục"
+              disabled={isCreatingFolder}
+              className="rounded-none border-border"
+              autoFocus
+            />
 
-            <DialogFooter>
+            <DialogFooter className="mt-4 gap-2">
               <Button
                 type="button"
-                variant="outline"
-                onClick={() =>
-                  !isCreatingFolder && setIsCreateFolderModalOpen(false)
-                }
+                variant="ghost"
+                onClick={() => !isCreatingFolder && setIsCreateFolderModalOpen(false)}
                 disabled={isCreatingFolder}
+                className="rounded-none"
               >
                 Hủy
               </Button>
               <Button
                 type="submit"
                 disabled={isCreatingFolder || !newFolderName.trim()}
+                className="rounded-none"
               >
-                {isCreatingFolder ? "Đang tạo..." : "Tạo thư mục"}
+                {isCreatingFolder ? "Đang tạo..." : "Tạo"}
               </Button>
             </DialogFooter>
           </form>

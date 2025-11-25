@@ -1,10 +1,7 @@
 "use client";
 import React from "react";
 import { DriveInfo } from "../types";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
-import { FolderPlus, FileUp, FolderUp, HardDrive, X, Menu } from "lucide-react";
+import { FolderPlus, FileUp, FolderUp, HardDrive, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 declare module "react" {
@@ -38,170 +35,134 @@ export default function Sidebar({
   isLoading = false,
 }: SidebarProps) {
   const folderInputRef = React.useRef<HTMLInputElement>(null);
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [isInteractionOpen, setIsInteractionOpen] = React.useState(false);
-  const [isDarkTheme, setIsDarkTheme] = React.useState(false);
-
-  React.useEffect(() => {
-    const isDark = document.documentElement.classList.contains("dark");
-    setIsDarkTheme(isDark);
-
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === "class") {
-          setIsDarkTheme(document.documentElement.classList.contains("dark"));
-        }
-      });
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    return () => observer.disconnect();
-  }, []);
 
   const handleCreateFolder = () => {
     onClose();
     onCreateFolder();
   };
 
+  const storagePercent = driveInfo ? (driveInfo.used / driveInfo.total) * 100 : 0;
+
   return (
     <>
+      {/* Mobile Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 md:hidden"
+          className="fixed inset-0 bg-background/80 z-40 md:hidden"
           onClick={onClose}
         />
       )}
 
-      <div
+      <aside
         className={cn(
-          "fixed md:sticky top-0 md:top-[84px] w-72",
-          "bg-background border-r",
-          "p-4 transition-transform duration-300 ease-out",
-          "z-50 flex flex-col shadow-lg md:shadow-none",
-          "h-[100vh] md:h-[calc(100vh-84px)] overflow-y-auto",
+          "fixed md:sticky top-0 md:top-14 w-64 bg-background border-r z-50",
+          "flex flex-col h-screen md:h-[calc(100vh-56px)]",
+          "transition-transform duration-200",
           isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
       >
-        <div className="flex items-center justify-between mb-6 md:hidden">
-          <h2 className="text-xl font-bold text-foreground">Menu</h2>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="w-6 h-6" />
-          </Button>
+        {/* Mobile Header */}
+        <div className="flex items-center justify-between p-4 border-b md:hidden">
+          <span className="text-sm font-medium">Menu</span>
+          <button onClick={onClose} className="p-1 text-muted-foreground hover:text-foreground">
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        {isLoading ? (
-          <div className="space-y-4">
-            <Skeleton className="h-12 w-full rounded-xl" />
+        {/* Content */}
+        <div className="flex-1 p-4 overflow-y-auto">
+          {isLoading ? (
             <div className="space-y-3">
-              <Skeleton className="h-12 w-full rounded-xl" />
-              <Skeleton className="h-12 w-full rounded-xl" />
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-10 bg-muted animate-pulse" />
+              ))}
             </div>
-            <div className="mt-6 space-y-3">
-              <Skeleton className="h-12 w-full rounded-xl" />
-              <Skeleton className="h-12 w-full rounded-xl" />
-              <Skeleton className="h-12 w-full rounded-xl" />
-            </div>
-          </div>
-        ) : (
-          <>
-            <Button
-              onClick={handleCreateFolder}
-              className="w-full justify-start gap-3 mb-4"
-              size="lg"
-            >
-              <FolderPlus className="w-5 h-5" />
-              <span>Tạo Thư Mục</span>
-            </Button>
-
-            <div className="space-y-3">
-              <Button
-                variant="outline"
-                className="w-full justify-start gap-3 h-auto py-3.5"
-                asChild
+          ) : (
+            <nav className="space-y-1">
+              <button
+                onClick={handleCreateFolder}
+                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-left hover:bg-muted transition-colors"
               >
-                <label htmlFor="fileInput" className="cursor-pointer">
-                  <FileUp className="w-5 h-5" />
-                  <span>Tải File Lên</span>
-                </label>
-              </Button>
+                <FolderPlus className="w-4 h-4" />
+                <span>Tạo thư mục</span>
+              </button>
 
-              <Button
-                variant="outline"
-                className="w-full justify-start gap-3 h-auto py-3.5"
-                asChild
+              <label
+                htmlFor="fileInput"
+                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm cursor-pointer hover:bg-muted transition-colors"
               >
-                <label htmlFor="folderInput" className="cursor-pointer">
-                  <FolderUp className="w-5 h-5" />
-                  <span>Tải Thư Mục Lên</span>
-                </label>
-              </Button>
-            </div>
+                <FileUp className="w-4 h-4" />
+                <span>Tải file lên</span>
+              </label>
 
-            {/* Hidden inputs */}
-            <input
-              id="fileInput"
-              type="file"
-              multiple
-              onChange={(e) => {
-                onUploadFile(e);
-                onClose();
-              }}
-              className="hidden"
-              ref={fileInputRef}
-            />
-            <input
-              id="folderInput"
-              type="file"
-              webkitdirectory=""
-              directory=""
-              multiple
-              onChange={(e) => {
-                onUploadFolder(e);
-                onClose();
-              }}
-              className="hidden"
-              ref={folderInputRef}
-            />
-
-            <div className="mt-6">
-              <Button
-                variant="ghost"
-                className="w-full justify-start gap-3 h-auto py-3.5"
+              <label
+                htmlFor="folderInput"
+                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm cursor-pointer hover:bg-muted transition-colors"
               >
-                <HardDrive className="w-5 h-5" />
-                <span>DA22TTC</span>
-              </Button>
-            </div>
-          </>
-        )}
+                <FolderUp className="w-4 h-4" />
+                <span>Tải thư mục lên</span>
+              </label>
 
-        {driveInfo && !isLoading ? (
-          <div className="mt-auto p-4 bg-muted/50 rounded-xl">
-            <div className="text-sm font-medium text-foreground mb-2">
-              Bộ nhớ đã dùng
+              <div className="pt-4 mt-4 border-t">
+                <div className="flex items-center gap-3 px-3 py-2.5 text-sm text-muted-foreground">
+                  <HardDrive className="w-4 h-4" />
+                  <span>DA22TTC</span>
+                </div>
+              </div>
+            </nav>
+          )}
+
+          {/* Hidden Inputs */}
+          <input
+            id="fileInput"
+            type="file"
+            multiple
+            onChange={(e) => {
+              onUploadFile(e);
+              onClose();
+            }}
+            className="hidden"
+            ref={fileInputRef}
+          />
+          <input
+            id="folderInput"
+            type="file"
+            webkitdirectory=""
+            directory=""
+            multiple
+            onChange={(e) => {
+              onUploadFolder(e);
+              onClose();
+            }}
+            className="hidden"
+            ref={folderInputRef}
+          />
+        </div>
+
+        {/* Storage Info */}
+        {driveInfo && !isLoading && (
+          <div className="p-4 border-t">
+            <div className="text-xs text-muted-foreground mb-2">Bộ nhớ</div>
+            <div className="h-1 bg-muted overflow-hidden">
+              <div
+                className="h-full bg-foreground transition-all"
+                style={{ width: `${storagePercent}%` }}
+              />
             </div>
-            <Progress
-              value={(driveInfo.used / driveInfo.total) * 100}
-              className="h-2"
-            />
-            <div className="mt-2 text-sm text-muted-foreground">
+            <div className="mt-2 text-xs text-muted-foreground">
               {formatBytes(driveInfo.remaining)} còn trống
             </div>
           </div>
-        ) : isLoading ? (
-          <div className="mt-auto p-4">
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-2/3 rounded-full" />
-              <Skeleton className="h-2 w-full rounded-full" />
-              <Skeleton className="h-4 w-1/2 rounded-full" />
-            </div>
+        )}
+
+        {isLoading && (
+          <div className="p-4 border-t">
+            <div className="h-3 w-16 bg-muted animate-pulse mb-2" />
+            <div className="h-1 bg-muted" />
+            <div className="h-3 w-24 bg-muted animate-pulse mt-2" />
           </div>
-        ) : null}
-      </div>
+        )}
+      </aside>
     </>
   );
 }
