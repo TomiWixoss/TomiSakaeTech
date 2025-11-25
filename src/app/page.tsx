@@ -1,429 +1,306 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import gsap from "gsap";
-import { TechLayout, TechHeader, TechSidebar } from "@/components/layout";
+import { TechLayout } from "@/components/layout";
 import {
-  HomeHero,
-  HomeFileCard,
-  HomeBreadcrumb,
-  HomeToolbar,
-  HomeEmptyState,
-  HomeDropZone,
-  HomeLoadingSkeleton,
-} from "@/components/home";
-import { 
-  ParticleField, 
-  NeonBorder, 
-  TechBadge, 
-  WaveformVisualizer,
+  ParticleField,
   DataStream,
-  StatusIndicator,
   GlitchText,
+  TechBadge,
   PulseRing,
-  LoadingDots,
-  HologramEffect,
-  RadarScan,
-  TechProgress,
+  NeonBorder,
 } from "@/components/ui/tech";
-import { useFileList } from "@/components/hooks/file-list";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Toaster, toast } from "react-hot-toast";
-import useDrive from "@/components/hooks/drive";
-import { Menu, FolderPlus, Terminal } from "lucide-react";
+import { HardDrive, FileText, Lock, ChevronLeft, ChevronRight, Folder, Database, Code } from "lucide-react";
+
+interface WorldCard {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  icon: React.ReactNode;
+  color: string;
+  status: "available" | "coming_soon" | "locked";
+  href?: string;
+  stats?: { label: string; value: string }[];
+}
+
+const worlds: WorldCard[] = [
+  {
+    id: "files",
+    title: "FILE_SYSTEM",
+    subtitle: "Google Drive Storage",
+    description: "Quản lý và lưu trữ tài liệu với khả năng tìm kiếm AI và đồng bộ Google Drive realtime.",
+    icon: <HardDrive className="w-12 h-12" />,
+    color: "#00ff88",
+    status: "available",
+    href: "/files",
+    stats: [
+      { label: "STORAGE", value: "2 TB" },
+      { label: "SYNC", value: "REALTIME" },
+    ],
+  },
+  {
+    id: "txt",
+    title: "TXT_STORAGE",
+    subtitle: "Code & Notes",
+    description: "Lưu trữ văn bản, code snippets và ghi chú với syntax highlighting tự động.",
+    icon: <FileText className="w-12 h-12" />,
+    color: "#00d4ff",
+    status: "available",
+    href: "/txt",
+    stats: [
+      { label: "FORMAT", value: "TXT/CODE" },
+      { label: "HIGHLIGHT", value: "AUTO" },
+    ],
+  },
+  {
+    id: "coming",
+    title: "NULL_ZONE",
+    subtitle: "Coming Soon",
+    description: "Khu vực đang được phát triển. Tính năng mới sẽ sớm được cập nhật.",
+    icon: <Lock className="w-12 h-12" />,
+    color: "#666666",
+    status: "coming_soon",
+    stats: [
+      { label: "STATUS", value: "DEV" },
+      { label: "ETA", value: "TBD" },
+    ],
+  },
+];
 
 export default function Home() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const gridRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartX = useRef(0);
+  const scrollStartX = useRef(0);
 
-  const {
-    files,
-    isLoading,
-    isSidebarLoading,
-    driveInfo,
-    currentFolderId,
-    currentFolderName,
-    folderPath,
-    searchTerm,
-    isAISearch,
-    handleSearchChange,
-    handleSearchClick,
-    handleFolderClick,
-    handleBreadcrumbClick,
-    handleBackClick,
-    handleToggleAISearch,
-    handleDelete,
-    formatBytes,
-    handleCreateFolder,
-    handleCreateFolderSubmit,
-    handleUploadFile,
-    handleUploadFolder,
-    checkFolderContent,
-    handleDownload,
-    isCreatingFolder,
-    isCreateFolderModalOpen,
-    setIsCreateFolderModalOpen,
-    newFolderName,
-    setNewFolderName,
-    handleReloadCache,
-    isReloading,
-  } = useDrive();
-
-  // Use file list hook for sorting/filtering
-  const {
-    files: sortedFiles,
-    uniqueExtensions,
-    showFolders,
-    setShowFolders,
-    selectedExtension,
-    setSelectedExtension,
-    sortCriteria,
-    setSortCriteria,
-    isGridView,
-    setIsGridView,
-    isDragging,
-    handleDragEnter,
-    handleDragLeave,
-    handleDragOver,
-    handleDrop,
-    generateDownloadLink,
-    handleDownloadFolder,
-    isAdminMode,
-    formatFileSize,
-    SortCriteria,
-  } = useFileList({
-    files,
-    isLoading,
-    currentFolderId,
-    currentFolderName,
-    folderPath,
-    onFolderClick: handleFolderClick,
-    onBreadcrumbClick: handleBreadcrumbClick,
-    onBackClick: handleBackClick,
-    onDownload: handleDownload,
-    onUploadFile: handleUploadFile,
-    onUploadFolder: handleUploadFolder,
-    onCheckFolderContent: checkFolderContent,
-    onDelete: handleDelete,
-  });
-
-  // Animate files on load - items visible by default, animation is enhancement only
   useEffect(() => {
-    if (!isLoading && gridRef.current && sortedFiles.length > 0) {
-      const items = gridRef.current.querySelectorAll(".file-item");
-      gsap.fromTo(
-        items,
-        { opacity: 0.5, y: 10 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.3,
-          stagger: 0.02,
-          ease: "power2.out",
-        }
-      );
-    }
-  }, [isLoading, sortedFiles, isGridView]);
+    if (!containerRef.current) return;
+    gsap.fromTo(
+      containerRef.current,
+      { opacity: 0 },
+      { opacity: 1, duration: 0.8, ease: "power2.out" }
+    );
+  }, []);
 
-  const triggerFileUpload = () => {
-    fileInputRef.current?.click();
+  useEffect(() => {
+    if (!cardsRef.current) return;
+    const cardWidth = window.innerWidth;
+    gsap.to(cardsRef.current, {
+      x: -currentIndex * cardWidth,
+      duration: 0.6,
+      ease: "power3.out",
+    });
+  }, [currentIndex]);
+
+  const goToWorld = (index: number) => {
+    if (index >= 0 && index < worlds.length) {
+      setCurrentIndex(index);
+    }
+  };
+
+  const handlePrev = () => goToWorld(currentIndex - 1);
+  const handleNext = () => goToWorld(currentIndex + 1);
+
+  const handleEnterWorld = (world: WorldCard) => {
+    if (world.status === "available" && world.href) {
+      router.push(world.href);
+    }
+  };
+
+  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    setIsDragging(true);
+    dragStartX.current = "touches" in e ? e.touches[0].clientX : e.clientX;
+    scrollStartX.current = currentIndex * window.innerWidth;
+  };
+
+  const handleDragEnd = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    const endX = "changedTouches" in e ? e.changedTouches[0].clientX : e.clientX;
+    const diff = dragStartX.current - endX;
+    if (Math.abs(diff) > 100) {
+      if (diff > 0) handleNext();
+      else handlePrev();
+    }
   };
 
   return (
-    <TechLayout showGrid showCircuits accentColor="#00ff88">
-      {/* Background effects */}
+    <TechLayout showGrid={false} accentColor="#00ff88">
       <div className="fixed inset-0 pointer-events-none">
-        <ParticleField
-          color="#00ff88"
-          particleCount={35}
-          speed={0.2}
-          connectDistance={100}
-          className="opacity-15"
-        />
-        <DataStream 
-          color="#00ff88" 
-          density={8} 
-          speed={60}
-          className="opacity-10"
-        />
+        <ParticleField color="#00ff88" particleCount={40} speed={0.3} connectDistance={120} className="opacity-20" />
+        <DataStream color="#00ff88" density={6} speed={50} className="opacity-5" />
       </div>
 
-      <Toaster
-        position="bottom-center"
-        toastOptions={{
-          style: {
-            background: "#00ff88",
-            color: "#000",
-            borderRadius: 0,
-            fontSize: "11px",
-            fontFamily: "monospace",
-            fontWeight: "bold",
-          },
-        }}
-      />
-
-      {/* Mobile Menu Button */}
-      <div className="md:hidden flex items-center justify-between h-14 px-4 border-b border-border bg-background/95 relative z-50">
-        <button
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="p-2 text-muted-foreground hover:text-[#00ff88] transition-colors"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <PulseRing color="#00ff88" size={24} rings={2} />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Terminal className="w-3 h-3 text-[#00ff88]" />
+      <div
+        ref={containerRef}
+        className="h-screen w-screen overflow-hidden relative"
+        onMouseDown={handleDragStart}
+        onMouseUp={handleDragEnd}
+        onMouseLeave={() => setIsDragging(false)}
+        onTouchStart={handleDragStart}
+        onTouchEnd={handleDragEnd}
+      >
+        {/* Header */}
+        <header className="absolute top-0 left-0 right-0 z-20 p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 border border-[#00ff88] flex items-center justify-center">
+                <Database className="w-5 h-5 text-[#00ff88]" />
+              </div>
+              <div>
+                <GlitchText className="text-lg font-bold font-mono" intensity="low">DA22TTC</GlitchText>
+                <p className="text-[10px] text-muted-foreground font-mono">SELECT_WORLD</p>
+              </div>
             </div>
+            <TechBadge variant="success" size="sm" pulse>v2.0</TechBadge>
           </div>
-          <GlitchText className="text-xs font-mono font-bold" intensity="low">DA22TTC</GlitchText>
-        </div>
-        <StatusIndicator status="online" label="LIVE" pulse />
-      </div>
+        </header>
 
-      <TechHeader
-        searchTerm={searchTerm}
-        onSearchChange={handleSearchChange}
-        isAISearch={isAISearch}
-        onToggleAISearch={handleToggleAISearch}
-        onSearch={handleSearchClick}
-        onReloadCache={handleReloadCache}
-        isReloading={isReloading}
-      />
-
-      {/* Hero Section */}
-      <HomeHero
-        driveInfo={driveInfo}
-        totalFiles={files.length}
-        isLoading={isLoading}
-      />
-
-      <div className="flex relative z-10">
-        <TechSidebar
-          driveInfo={driveInfo}
-          onCreateFolder={handleCreateFolder}
-          onUploadFile={handleUploadFile}
-          onUploadFolder={handleUploadFolder}
-          formatBytes={formatBytes}
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          fileInputRef={fileInputRef}
-          isLoading={isSidebarLoading}
-        />
-
-        {/* Main content */}
-        <main
-          className="flex-1 min-h-screen relative"
-          onDragEnter={handleDragEnter}
-          onDragLeave={handleDragLeave}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
+        {/* World Cards Container */}
+        <div
+          ref={cardsRef}
+          className="flex h-full"
+          style={{ width: `${worlds.length * 100}vw` }}
         >
-          {/* Drop zone overlay */}
-          <HomeDropZone isVisible={isDragging} />
+          {worlds.map((world, index) => (
+            <div
+              key={world.id}
+              className="w-screen h-screen flex items-center justify-center p-8"
+            >
+              <div className="max-w-lg w-full">
+                {/* World Card */}
+                <div
+                  className={`relative border-2 p-8 transition-all duration-300 cursor-pointer group ${
+                    world.status === "available"
+                      ? "border-current hover:shadow-[0_0_30px_rgba(0,255,136,0.3)]"
+                      : "border-muted-foreground/30 opacity-60"
+                  }`}
+                  style={{ borderColor: world.status === "available" ? world.color : undefined }}
+                  onClick={() => handleEnterWorld(world)}
+                >
+                  {/* Corner accents */}
+                  <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2" style={{ borderColor: world.color }} />
+                  <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2" style={{ borderColor: world.color }} />
+                  <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2" style={{ borderColor: world.color }} />
+                  <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2" style={{ borderColor: world.color }} />
 
-          <div className="p-6 lg:p-8">
-            {/* Breadcrumb */}
-            <HomeBreadcrumb
-              currentFolderId={currentFolderId}
-              currentFolderName={currentFolderName}
-              folderPath={folderPath}
-              onNavigate={(id, index) => {
-                if (id === null) {
-                  handleBackClick();
-                } else if (index !== undefined) {
-                  handleBreadcrumbClick(id, index);
-                }
-              }}
-              onBack={handleBackClick}
-            />
-
-            {/* Toolbar */}
-            <HomeToolbar
-              totalItems={sortedFiles.length}
-              showFolders={showFolders}
-              onToggleFolders={() => setShowFolders(!showFolders)}
-              selectedExtension={selectedExtension}
-              onSelectExtension={setSelectedExtension}
-              uniqueExtensions={uniqueExtensions}
-              sortCriteria={sortCriteria}
-              onSortChange={(criteria) => setSortCriteria(criteria as typeof SortCriteria[keyof typeof SortCriteria])}
-              isGridView={isGridView}
-              onToggleView={() => setIsGridView(!isGridView)}
-              isLoading={isLoading}
-            />
-
-            {/* File grid/list */}
-            {isLoading ? (
-              <div className="relative">
-                <HomeLoadingSkeleton isGridView={isGridView} count={8} />
-                {/* Loading overlay with radar */}
-                <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm">
-                  <div className="flex flex-col items-center gap-4">
-                    <RadarScan size={80} color="#00ff88" speed={2} />
-                    <div className="flex items-center gap-2">
-                      <LoadingDots color="#00ff88" size={6} />
-                      <span className="text-xs font-mono text-muted-foreground">SCANNING_FILES</span>
+                  {/* Icon */}
+                  <div className="flex justify-center mb-6">
+                    <div className="relative">
+                      <PulseRing color={world.color} size={100} rings={world.status === "available" ? 3 : 0} speed={3} />
+                      <div className="absolute inset-0 flex items-center justify-center" style={{ color: world.color }}>
+                        {world.icon}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            ) : sortedFiles.length === 0 ? (
-              <HomeEmptyState
-                onCreateFolder={handleCreateFolder}
-                onUploadFile={triggerFileUpload}
-              />
-            ) : (
-              <div
-                ref={gridRef}
-                className={
-                  isGridView
-                    ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-                    : "space-y-2"
-                }
-              >
-                {sortedFiles.map((file) => (
-                  <div key={file.id} className="file-item">
-                    <HomeFileCard
-                      id={file.id}
-                      name={file.name}
-                      mimeType={file.mimeType}
-                      createdTime={file.createdTime}
-                      size={file.size}
-                      isUploading={file.isUploading}
-                      uploadProgress={file.uploadProgress}
-                      isAdmin={isAdminMode}
-                      onFolderClick={() => handleFolderClick(file.id, file.name)}
-                      onCopyLink={() => {
-                        navigator.clipboard.writeText(generateDownloadLink(file.id));
-                        toast.success("LINK_COPIED");
-                      }}
-                      onDownload={() => {
-                        if (file.mimeType === "application/vnd.google-apps.folder") {
-                          handleDownloadFolder(file.id, file.name);
-                        } else {
-                          handleDownload(file.id, file.name);
-                        }
-                      }}
-                      onDelete={() => handleDelete(file.id)}
-                      formatFileSize={formatFileSize}
-                    />
+
+                  {/* Title */}
+                  <div className="text-center mb-4">
+                    <GlitchText
+                      className="text-2xl font-bold font-mono mb-1"
+                      intensity={world.status === "available" ? "low" : "high"}
+                    >
+                      {world.title}
+                    </GlitchText>
+                    <p className="text-xs text-muted-foreground font-mono">{world.subtitle}</p>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </main>
-      </div>
 
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
-        onChange={handleUploadFile}
-        className="hidden"
-      />
+                  {/* Description */}
+                  <p className="text-sm text-muted-foreground text-center mb-6 leading-relaxed">
+                    {world.description}
+                  </p>
 
-      {/* Create Folder Dialog */}
-      <Dialog
-        open={isCreateFolderModalOpen}
-        onOpenChange={(open) => {
-          if (!isCreatingFolder) setIsCreateFolderModalOpen(open);
-        }}
-      >
-        <DialogContent className="sm:max-w-md border-[#00ff88]/30 rounded-none bg-background p-0 overflow-hidden">
-          <HologramEffect color="#00ff88" className="absolute inset-0 pointer-events-none">
-            <div />
-          </HologramEffect>
-          
-          <div className="border-b border-[#00ff88]/20 bg-[#00ff88]/5 px-6 py-4 relative">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-3 font-mono">
-                <div className="relative">
-                  <PulseRing color="#00ff88" size={32} rings={2} />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <FolderPlus className="w-4 h-4 text-[#00ff88]" />
+                  {/* Stats */}
+                  {world.stats && (
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      {world.stats.map((stat) => (
+                        <div key={stat.label} className="text-center p-3 bg-muted/20 border border-border">
+                          <p className="text-[10px] text-muted-foreground font-mono mb-1">{stat.label}</p>
+                          <p className="text-sm font-mono font-bold" style={{ color: world.color }}>{stat.value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Enter Button */}
+                  {world.status === "available" ? (
+                    <NeonBorder color={world.color} intensity="medium" animated>
+                      <button className="w-full py-4 font-mono text-sm font-bold tracking-wider transition-colors hover:bg-white/5">
+                        ENTER_WORLD →
+                      </button>
+                    </NeonBorder>
+                  ) : (
+                    <div className="w-full py-4 text-center font-mono text-sm text-muted-foreground border border-dashed border-muted-foreground/30">
+                      COMING_SOON
+                    </div>
+                  )}
+
+                  {/* Status Badge */}
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <TechBadge
+                      variant={world.status === "available" ? "success" : "warning"}
+                      size="sm"
+                      pulse={world.status === "available"}
+                    >
+                      {world.status === "available" ? "ONLINE" : "OFFLINE"}
+                    </TechBadge>
                   </div>
                 </div>
-                <GlitchText intensity="low">NEW_FOLDER</GlitchText>
-                <TechBadge variant="success" size="sm" pulse>
-                  CREATE
-                </TechBadge>
-              </DialogTitle>
-            </DialogHeader>
-          </div>
 
-          <form onSubmit={handleCreateFolderSubmit} className="p-6 relative">
-            <NeonBorder color="#00ff88" intensity="medium" animated>
-              <Input
-                type="text"
-                value={newFolderName}
-                onChange={(e) => setNewFolderName(e.target.value)}
-                placeholder="FOLDER_NAME"
-                disabled={isCreatingFolder}
-                className="rounded-none border-0 bg-transparent font-mono text-sm h-12"
-                autoFocus
-              />
-            </NeonBorder>
-
-            <div className="flex items-center justify-between mt-4">
-              <WaveformVisualizer
-                color="#00ff88"
-                bars={12}
-                height={24}
-                active={newFolderName.length > 0}
-              />
-              {newFolderName.length > 0 && (
-                <div className="w-24">
-                  <TechProgress 
-                    value={Math.min(newFolderName.length * 5, 100)} 
-                    max={100}
-                    color="#00ff88"
-                    height="sm"
-                    showValue
-                  />
-                </div>
-              )}
-            </div>
-
-            <DialogFooter className="mt-6 gap-3">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => !isCreatingFolder && setIsCreateFolderModalOpen(false)}
-                disabled={isCreatingFolder}
-                className="rounded-none font-mono text-xs"
-              >
-                CANCEL
-              </Button>
-              <Button
-                type="submit"
-                disabled={isCreatingFolder || !newFolderName.trim()}
-                className="rounded-none font-mono text-xs bg-[#00ff88] text-black hover:bg-[#00ff88]/90 relative overflow-hidden"
-              >
-                {isCreatingFolder ? (
-                  <span className="flex items-center gap-2">
-                    <LoadingDots color="#000" size={4} />
-                    CREATING
+                {/* World Index */}
+                <div className="text-center mt-6">
+                  <span className="text-xs font-mono text-muted-foreground">
+                    WORLD_{String(index + 1).padStart(2, "0")} / {String(worlds.length).padStart(2, "0")}
                   </span>
-                ) : (
-                  "CREATE_FOLDER"
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Navigation Arrows */}
+        <button
+          onClick={handlePrev}
+          disabled={currentIndex === 0}
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-4 border border-border bg-background/80 backdrop-blur-sm disabled:opacity-20 disabled:cursor-not-allowed hover:border-[#00ff88] hover:text-[#00ff88] transition-colors"
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+        <button
+          onClick={handleNext}
+          disabled={currentIndex === worlds.length - 1}
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-4 border border-border bg-background/80 backdrop-blur-sm disabled:opacity-20 disabled:cursor-not-allowed hover:border-[#00ff88] hover:text-[#00ff88] transition-colors"
+        >
+          <ChevronRight className="w-6 h-6" />
+        </button>
+
+        {/* Dots Indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3">
+          {worlds.map((world, index) => (
+            <button
+              key={world.id}
+              onClick={() => goToWorld(index)}
+              className={`w-3 h-3 border transition-all ${
+                currentIndex === index
+                  ? "bg-[#00ff88] border-[#00ff88] scale-125"
+                  : "border-muted-foreground hover:border-foreground"
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* Swipe Hint */}
+        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20">
+          <p className="text-[10px] font-mono text-muted-foreground animate-pulse">
+            ← SWIPE_TO_NAVIGATE →
+          </p>
+        </div>
+      </div>
     </TechLayout>
   );
 }

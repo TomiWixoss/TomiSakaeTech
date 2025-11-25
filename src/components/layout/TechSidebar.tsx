@@ -3,7 +3,7 @@ import React, { useRef, useEffect } from "react";
 import gsap from "gsap";
 import { DriveInfo } from "@/types";
 import { TechProgress, StatusIndicator } from "@/components/ui/tech";
-import { FolderTechIcon, UploadTechIcon, StorageTechIcon } from "@/components/icons/TechIcons";
+import { StorageTechIcon } from "@/components/icons/TechIcons";
 import { FolderPlus, FileUp, FolderUp, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -83,8 +83,9 @@ export const TechSidebar: React.FC<TechSidebarProps> = ({
         ref={sidebarRef}
         className={cn(
           "w-72 bg-background border-r border-border z-50 shrink-0",
-          "flex flex-col",
-          "fixed md:sticky top-0 left-0 h-screen",
+          "flex flex-col h-full",
+          "fixed md:relative top-0 left-0",
+          "md:h-auto",
           "transition-transform duration-300 ease-out",
           isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
