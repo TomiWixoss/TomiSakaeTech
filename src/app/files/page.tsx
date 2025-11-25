@@ -82,6 +82,9 @@ export default function FilesPage() {
     handleBackClick,
     handleToggleAISearch,
     handleDelete,
+    startDeleteEffect,
+    handleDeleteComplete,
+    deletingFileId,
     formatBytes,
     handleCreateFolder,
     handleCreateFolderSubmit,
@@ -310,10 +313,12 @@ export default function FilesPage() {
                         uploadProgress={file.uploadProgress}
                         isAdmin={isAdminMode}
                         viewMode={isGridView ? "grid" : "list"}
+                        isDeleting={deletingFileId === file.id}
                         onFolderClick={() => handleFolderClick(file.id, file.name)}
                         onCopyLink={() => { navigator.clipboard.writeText(generateDownloadLink(file.id)); toast.success("LINK_COPIED"); }}
                         onDownload={() => { file.mimeType === "application/vnd.google-apps.folder" ? handleDownloadFolder(file.id, file.name) : handleDownload(file.id, file.name); }}
-                        onDelete={() => handleDelete(file.id)}
+                        onDelete={() => startDeleteEffect(file.id)}
+                        onDeleteComplete={handleDeleteComplete}
                         onPreview={() => setPreviewFile({ id: file.id, name: file.name })}
                         formatFileSize={formatFileSize}
                       />

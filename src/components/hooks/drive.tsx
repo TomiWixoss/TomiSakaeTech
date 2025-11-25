@@ -25,6 +25,7 @@ const useDrive = () => {
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [fileCache, setFileCache] = useState<Record<string, FileItem[]>>({});
   const [isReloading, setIsReloading] = useState(false);
+  const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDriveInfo = async () => {
@@ -700,6 +701,43 @@ const useDrive = () => {
     setIsAISearch(!isAISearch);
   };
 
+  // Bắt đầu hiệu ứng xóa
+  const startDeleteEffect = (fileId: string) => {
+    setDeletingFileId(fileId);
+  };
+
+  // Thực hiện xóa thực sự sau khi hiệu ứng hoàn tất
+  const handleDeleteComplete = async () => {
+    if (!deletingFileId) return;
+    
+    try {
+      const response = await fetch(`/api/drive/delete?fileId=${deletingFileId}`, {
+        method: "DELETE",
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Lỗi khi xóa file");
+      }
+
+      // Xóa file khỏi state ngay lập tức (đã có hiệu ứng rồi)
+      setFiles((prev) => prev.filter((f) => f.id !== deletingFileId));
+      
+      // Reset cache
+      setFileCache({});
+      
+      toast.success("File đã bị xóa vĩnh viễn!");
+    } catch (error) {
+      console.error("Lỗi khi xóa file:", error);
+      toast.error("Có lỗi xảy ra khi xóa file");
+    } finally {
+      setDeletingFileId(null);
+    }
+  };
+
+  // Legacy delete (không có hiệu ứng)
   const handleDelete = async (fileId: string) => {
     try {
       const response = await fetch(`/api/drive/delete?fileId=${fileId}`, {
@@ -815,6 +853,9 @@ const useDrive = () => {
     handleBreadcrumbClick,
     handleToggleAISearch,
     handleDelete,
+    startDeleteEffect,
+    handleDeleteComplete,
+    deletingFileId,
     handleCreateFolder,
     handleCreateFolderSubmit,
     handleUploadFile,

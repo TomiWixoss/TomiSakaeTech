@@ -10,6 +10,9 @@ import {
   NeonBorder,
   DataStream,
   HackerText,
+  RadarScan,
+  TerminalText,
+  LoadingDots,
 } from "@/components/ui/tech";
 import { Shield, X, Save, RefreshCw, Lock, Settings, Zap, Ban } from "lucide-react";
 import toast from "react-hot-toast";
@@ -98,8 +101,61 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ isOpen, onClos
         <DataStream color="#00ff88" density={8} speed={40} className="opacity-10" />
       </div>
 
-      <div className="relative w-full max-w-md animate-in fade-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
-        <TechCard className="p-0 overflow-hidden" corners glow>
+      <div className="relative w-full max-w-md animate-in fade-in duration-200" onClick={(e) => e.stopPropagation()}>
+        <TechCard className="p-0 overflow-hidden relative" corners hover={false}>
+          {/* Loading Overlay */}
+          {isLoading && (
+            <div className="absolute inset-0 z-50 bg-black/95 flex flex-col items-center justify-center">
+              {/* Animated border */}
+              <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#00ff88] to-transparent animate-[scan_1s_linear_infinite]" />
+                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#00ff88] to-transparent animate-[scan_1s_linear_infinite_reverse]" />
+              </div>
+              
+              {/* Radar effect */}
+              <div className="relative mb-6">
+                <RadarScan size={100} color="#00ff88" speed={1.5} />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Shield className="w-8 h-8 text-[#00ff88] animate-pulse" />
+                </div>
+              </div>
+
+              {/* Progress text */}
+              <div className="text-center space-y-3">
+                <TerminalText color="#00ff88" prefix="$ " typingSpeed={50} showCursor>
+                  sudo authenticate --admin
+                </TerminalText>
+                <div className="flex items-center gap-2 justify-center">
+                  <LoadingDots color="#00ff88" size={6} />
+                  <span className="text-[#00ff88]/80 font-mono text-xs">VERIFYING_CREDENTIALS...</span>
+                </div>
+              </div>
+
+              {/* Fake progress steps */}
+              <div className="mt-6 space-y-2 text-[10px] font-mono text-[#00ff88]/50">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-[#00ff88] animate-pulse" />
+                  <span>ENCRYPTING_CONNECTION</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-[#00ff88]/50 animate-pulse" style={{ animationDelay: "0.2s" }} />
+                  <span>VALIDATING_TOKEN</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-[#00ff88]/30 animate-pulse" style={{ animationDelay: "0.4s" }} />
+                  <span>GRANTING_ACCESS</span>
+                </div>
+              </div>
+
+              {/* Binary decoration */}
+              <div className="absolute bottom-4 left-0 right-0 text-center">
+                <span className="text-[8px] font-mono text-[#00ff88]/20">
+                  01000001 01000100 01001101 01001001 01001110
+                </span>
+              </div>
+            </div>
+          )}
+
           <div className="relative border-b border-border p-4 bg-gradient-to-r from-[#00ff88]/10 to-transparent">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -111,13 +167,13 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ isOpen, onClos
                   <p className="text-[10px] text-muted-foreground font-mono">AUTHENTICATION</p>
                 </div>
               </div>
-              <button onClick={onClose} className="p-2 hover:bg-foreground/10 transition-colors">
+              <button onClick={onClose} disabled={isLoading} className="p-2 hover:bg-foreground/10 transition-colors disabled:opacity-30">
                 <X className="w-5 h-5" />
               </button>
             </div>
           </div>
 
-          <form onSubmit={handleLogin} className="p-6 space-y-6">
+          <form onSubmit={handleLogin} className={`p-6 space-y-6 ${isLoading ? "opacity-0" : ""}`}>
             <div className="text-center mb-4">
               <div className="w-16 h-16 mx-auto mb-4 border-2 border-[#00ff88] flex items-center justify-center relative">
                 <Lock className="w-7 h-7 text-[#00ff88]" />
@@ -135,10 +191,11 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ isOpen, onClos
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               accentColor="#00ff88"
+              disabled={isLoading}
             />
 
             <NeonBorder color="#00ff88" intensity="medium" animated>
-              <TechButton type="submit" variant="primary" className="w-full py-4" loading={isLoading} icon={<Shield className="w-4 h-4" />}>
+              <TechButton type="submit" variant="primary" className="w-full py-4" disabled={isLoading} icon={<Shield className="w-4 h-4" />}>
                 AUTHENTICATE
               </TechButton>
             </NeonBorder>
@@ -245,8 +302,8 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({ isOpen, onCl
         <DataStream color="#00ff88" density={8} speed={40} className="opacity-10" />
       </div>
 
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
-        <TechCard className="p-0 overflow-hidden" corners glow>
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in fade-in duration-200" onClick={(e) => e.stopPropagation()}>
+        <TechCard className="p-0 overflow-hidden" corners hover={false}>
           {/* Header */}
           <div className="relative border-b border-border p-4 bg-gradient-to-r from-[#00ff88]/10 to-transparent">
             <div className="flex items-center justify-between">

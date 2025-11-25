@@ -38,3 +38,4 @@ export { CyberText } from "./CyberText";
 export { VoidText } from "./VoidText";
 export { VoidZone } from "./VoidZone";
 export { LightningUploadProgress } from "./LightningUploadProgress";
+export { FileDeleteEffect, useFileDeleteEffect } from "./FileDeleteEffect";

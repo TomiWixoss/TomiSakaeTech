@@ -1,7 +1,7 @@
 "use client";
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import gsap from "gsap";
-import { NeonBorder, TechBadge, LightningUploadProgress } from "@/components/ui/tech";
+import { NeonBorder, TechBadge, LightningUploadProgress, FileDeleteEffect } from "@/components/ui/tech";
 import { FolderTechIcon, FileTechIcon } from "@/components/icons/TechIcons";
 import {
   DropdownMenu,
@@ -23,10 +23,12 @@ interface HomeFileCardProps {
   uploadProgress?: number;
   isAdmin: boolean;
   viewMode?: "grid" | "list";
+  isDeleting?: boolean;
   onFolderClick: () => void;
   onCopyLink: () => void;
   onDownload: () => void;
   onDelete: () => void;
+  onDeleteComplete?: () => void;
   onPreview?: () => void;
   formatFileSize: (bytes: number) => string;
 }
@@ -41,15 +43,18 @@ export const HomeFileCard: React.FC<HomeFileCardProps> = ({
   uploadProgress,
   isAdmin,
   viewMode = "grid",
+  isDeleting = false,
   onFolderClick,
   onCopyLink,
   onDownload,
   onDelete,
+  onDeleteComplete,
   onPreview,
   formatFileSize,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const isFolder = mimeType === "application/vnd.google-apps.folder";
+  const _ = id; // Suppress unused warning
 
   useEffect(() => {
     if (!cardRef.current || viewMode === "list") return;
@@ -106,15 +111,20 @@ export const HomeFileCard: React.FC<HomeFileCardProps> = ({
   // List view layout
   if (viewMode === "list") {
     return (
-      <div
-        ref={cardRef}
-        className={cn(
-          "group cursor-pointer border border-border hover:border-[#00ff88]/50 bg-card transition-colors",
-          isUploading && "opacity-60 pointer-events-none"
-        )}
-        onClick={handleClick}
-        onDoubleClick={handleDoubleClick}
+      <FileDeleteEffect
+        isDeleting={isDeleting}
+        onComplete={onDeleteComplete}
+        duration={2000}
       >
+        <div
+          ref={cardRef}
+          className={cn(
+            "group cursor-pointer border border-border hover:border-[#00ff88]/50 bg-card transition-colors",
+            isUploading && "opacity-60 pointer-events-none"
+          )}
+          onClick={handleClick}
+          onDoubleClick={handleDoubleClick}
+        >
         <div className="flex items-center gap-4 px-4 py-3">
           {/* Icon */}
           {isFolder ? (
@@ -195,19 +205,25 @@ export const HomeFileCard: React.FC<HomeFileCardProps> = ({
           )}
         </div>
       </div>
+      </FileDeleteEffect>
     );
   }
 
   // Grid view layout (default)
   return (
-    <div
-      ref={cardRef}
-      className={cn(
-        "group cursor-pointer",
-        isUploading && "opacity-60 pointer-events-none"
-      )}
-      onClick={handleClick}
-      onDoubleClick={handleDoubleClick}
+    <FileDeleteEffect
+      isDeleting={isDeleting}
+      onComplete={onDeleteComplete}
+      duration={2000}
+    >
+      <div
+        ref={cardRef}
+        className={cn(
+          "group cursor-pointer",
+          isUploading && "opacity-60 pointer-events-none"
+        )}
+        onClick={handleClick}
+        onDoubleClick={handleDoubleClick}
     >
       <NeonBorder
         color={isFolder ? "#00ff88" : "#00aaff"}
@@ -302,6 +318,7 @@ export const HomeFileCard: React.FC<HomeFileCardProps> = ({
         </div>
       </NeonBorder>
     </div>
+    </FileDeleteEffect>
   );
 };
 
