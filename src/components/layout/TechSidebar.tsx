@@ -22,7 +22,7 @@ interface TechSidebarProps {
   formatBytes: (bytes: number) => string;
   isOpen: boolean;
   onClose: () => void;
-  fileInputRef: React.RefObject<HTMLInputElement>;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
   isLoading?: boolean;
 }
 
