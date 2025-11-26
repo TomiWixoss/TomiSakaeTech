@@ -112,11 +112,11 @@ const TechToastItem: React.FC<{ toast: Toast; onRemove: () => void }> = ({
     const el = itemRef.current;
     if (!el) return;
 
-    // Enter animation
+    // Enter animation - trồi lên từ dưới
     gsap.fromTo(
       el,
-      { x: 120, opacity: 0, scale: 0.8 },
-      { x: 0, opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }
+      { y: 80, opacity: 0, scale: 0.8 },
+      { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }
     );
 
     // Scanline effect
@@ -164,13 +164,13 @@ const TechToastItem: React.FC<{ toast: Toast; onRemove: () => void }> = ({
     const el = itemRef.current;
     if (!el) return;
 
-    // Glitch out animation
+    // Glitch out animation - rơi xuống dưới
     gsap.to(el, {
       keyframes: [
-        { x: 5, opacity: 1, duration: 0.05 },
-        { x: -5, opacity: 0.8, duration: 0.05 },
-        { x: 10, opacity: 0.5, duration: 0.05 },
-        { x: 100, opacity: 0, scale: 0.9, duration: 0.2 },
+        { y: -5, opacity: 1, duration: 0.05 },
+        { y: 5, opacity: 0.8, duration: 0.05 },
+        { y: -3, opacity: 0.5, duration: 0.05 },
+        { y: 80, opacity: 0, scale: 0.9, duration: 0.25 },
       ],
       ease: "power2.in",
       onComplete: onRemove,
@@ -391,7 +391,7 @@ export const TechToastContainer: React.FC = () => {
   if (!mounted) return null;
 
   return createPortal(
-    <div className="fixed top-4 right-4 z-[9999] flex flex-col gap-3">
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] flex flex-col-reverse gap-3 items-center">
       <style jsx global>{`
         @keyframes shimmer {
           0% { transform: translateX(-100%); }

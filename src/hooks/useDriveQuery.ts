@@ -48,6 +48,7 @@ export function useDriveQuery() {
   });
 
   // Combine real files with uploading files
+  // Không filter deletedFileIds ở đây - để FileDeleteEffect handle animation
   const files = [...(filesQuery.data || []), ...uploadingFiles].sort((a, b) => {
     const isAFolder = a.mimeType === "application/vnd.google-apps.folder";
     const isBFolder = b.mimeType === "application/vnd.google-apps.folder";
@@ -81,13 +82,18 @@ export function useDriveQuery() {
     onError: () => techToast.error("Lỗi khi tạo thư mục"),
   });
 
-  // Mutation: Delete file
+  // Mutation: Delete file - chỉ gọi sau khi animation xong
   const deleteFileMutation = useMutation({
     mutationFn: driveService.deleteFile,
-    onSuccess: () => {
+    onSuccess: (_, fileId) => {
+      // Xóa file khỏi cache ngay lập tức
+      queryClient.setQueryData(
+        ["files", currentFolderId],
+        (oldData: FileItem[] | undefined) =>
+          oldData ? oldData.filter((f) => f.id !== fileId) : []
+      );
       setDeletingFileId(null);
       techToast.success("File đã bị xóa vĩnh viễn!");
-      queryClient.invalidateQueries({ queryKey: ["files"] });
     },
     onError: () => {
       techToast.error("Có lỗi xảy ra khi xóa file");
@@ -390,18 +396,18 @@ export function useDriveQuery() {
 
   const handleToggleAISearch = () => setIsAISearch(!isAISearch);
 
-  // Bắt đầu delete: set state + gọi API ngay lập tức
+  // Bắt đầu delete: chỉ set state để trigger animation
   const startDeleteEffect = (fileId: string) => {
     setDeletingFileId(fileId);
-    // Gọi API delete ngay khi bắt đầu animation
-    deleteFileMutation.mutate(fileId);
+    // KHÔNG gọi API ở đây - đợi animation xong
   };
 
-  // Callback khi animation xong - không cần làm gì vì API đã được gọi rồi
+  // Callback khi animation xong - GỌI API DELETE Ở ĐÂY
   const handleDeleteComplete = useCallback(() => {
-    // Animation xong, card sẽ tự ẩn qua FileDeleteEffect
-    // Nếu API lỗi, onError sẽ clear deletingFileId để hiện lại card
-  }, []);
+    if (deletingFileId) {
+      deleteFileMutation.mutate(deletingFileId);
+    }
+  }, [deletingFileId]);
 
   const handleDelete = (fileId: string) => deleteFileMutation.mutate(fileId);
 
