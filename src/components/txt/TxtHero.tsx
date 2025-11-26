@@ -76,7 +76,7 @@ export const TxtHero: React.FC<TxtHeroProps> = ({ totalNotes }) => {
               <div className="w-12 h-12 border-2 border-[#00ff88] flex items-center justify-center">
                 <TerminalIcon size={24} className="text-[#00ff88]" />
               </div>
-              <div className="h-px flex-1 bg-gradient-to-r from-[#00ff88] to-transparent" />
+              <div className="h-px flex-1 bg-linear-to-r from-[#00ff88] to-transparent" />
             </div>
             
             <h1 className="text-6xl md:text-7xl lg:text-8xl font-light tracking-tight leading-[0.9] font-mono">

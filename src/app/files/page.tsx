@@ -174,7 +174,7 @@ function FilesPageContent() {
       {/* Fixed full-height layout */}
       <div className="h-screen flex flex-col overflow-hidden">
         {/* Header - Fixed */}
-        <header className="shrink-0 z-50 bg-background/95 border-b border-border backdrop-blur-sm">
+        <header className="shrink-0 z-50 bg-background/95 border-b border-border backdrop-blur-xs">
           <div className="flex items-center justify-between px-4 md:px-6 h-14">
             <div className="flex items-center gap-4">
               <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="md:hidden p-2 text-muted-foreground hover:text-[#00ff88]">
@@ -196,7 +196,7 @@ function FilesPageContent() {
                   value={searchTerm}
                   onChange={handleSearchChange}
                   placeholder={isAISearch ? "// AI SEARCH..." : "// SEARCH..."}
-                  className="w-full bg-muted/30 border border-border pl-10 pr-20 py-2 text-sm font-mono outline-none focus:border-[#00ff88]/50"
+                  className="w-full bg-muted/30 border border-border pl-10 pr-20 py-2 text-sm font-mono outline-hidden focus:border-[#00ff88]/50"
                   onKeyDown={(e) => e.key === "Enter" && handleSearchClick()}
                 />
                 <button onClick={handleToggleAISearch} className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 ${isAISearch ? "text-[#00ff88]" : "text-muted-foreground"}`}>
@@ -366,9 +366,9 @@ function FilesPageContent() {
         <DialogContent className="sm:max-w-md border border-[#00ff88]/40 rounded-none bg-black/95 p-0 overflow-hidden shadow-[0_0_50px_rgba(0,255,136,0.15)]">
           {/* Scan line effect */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,255,136,0.03)_50%)] bg-[length:100%_4px]" />
-            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#00ff88] to-transparent animate-pulse" />
-            <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#00ff88] to-transparent animate-pulse" />
+            <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,255,136,0.03)_50%)] bg-size-[100%_4px]" />
+            <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-[#00ff88] to-transparent animate-pulse" />
+            <div className="absolute bottom-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-[#00ff88] to-transparent animate-pulse" />
           </div>
 
           {/* Corner accents */}
@@ -379,7 +379,7 @@ function FilesPageContent() {
 
           {/* Header */}
           <div className="border-b border-[#00ff88]/30 bg-[#00ff88]/5 px-6 py-5 relative">
-            <div className="absolute top-0 left-0 right-0 h-full bg-gradient-to-b from-[#00ff88]/10 to-transparent" />
+            <div className="absolute top-0 left-0 right-0 h-full bg-linear-to-b from-[#00ff88]/10 to-transparent" />
             <DialogHeader>
               <DialogTitle className="flex items-center gap-4 font-mono relative">
                 <div className="relative">
@@ -403,8 +403,8 @@ function FilesPageContent() {
             <div className="absolute inset-0 z-50 bg-black/90 flex flex-col items-center justify-center">
               {/* Animated border */}
               <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#00ff88] to-transparent animate-[scan_1s_linear_infinite]" />
-                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#00ff88] to-transparent animate-[scan_1s_linear_infinite_reverse]" />
+                <div className="absolute top-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-[#00ff88] to-transparent animate-[scan_1s_linear_infinite]" />
+                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-[#00ff88] to-transparent animate-[scan_1s_linear_infinite_reverse]" />
               </div>
               
               {/* Radar effect */}
@@ -455,7 +455,7 @@ function FilesPageContent() {
           <form onSubmit={handleCreateFolderSubmit} className={`p-6 relative ${isCreatingFolder ? "opacity-0" : ""}`}>
             {/* Input field */}
             <div className="relative group">
-              <div className="absolute -inset-[1px] bg-gradient-to-r from-[#00ff88]/50 via-[#00ff88] to-[#00ff88]/50 opacity-50 group-focus-within:opacity-100 transition-opacity" />
+              <div className="absolute -inset-px bg-linear-to-r from-[#00ff88]/50 via-[#00ff88] to-[#00ff88]/50 opacity-50 group-focus-within:opacity-100 transition-opacity" />
               <div className="relative bg-black">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#00ff88]/50 font-mono text-sm">&gt;</div>
                 <Input 
@@ -516,9 +516,9 @@ function FilesPageContent() {
 
             {/* Bottom decoration */}
             <div className="mt-4 flex items-center justify-center gap-2">
-              <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-[#00ff88]/30" />
+              <div className="h-px flex-1 bg-linear-to-r from-transparent to-[#00ff88]/30" />
               <span className="text-[8px] font-mono text-[#00ff88]/30">SYS.MKDIR</span>
-              <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-[#00ff88]/30" />
+              <div className="h-px flex-1 bg-linear-to-l from-transparent to-[#00ff88]/30" />
             </div>
           </form>
         </DialogContent>

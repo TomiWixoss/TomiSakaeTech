@@ -58,7 +58,7 @@ export const TechInput: React.FC<TechInputProps> = ({
             props.onBlur?.(e);
           }}
           className={cn(
-            "w-full bg-transparent border border-border px-4 py-3 text-sm font-mono outline-none transition-colors",
+            "w-full bg-transparent border border-border px-4 py-3 text-sm font-mono outline-hidden transition-colors",
             icon && "pl-10",
             error && "border-red-500",
             className

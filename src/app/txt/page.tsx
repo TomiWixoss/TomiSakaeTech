@@ -122,7 +122,7 @@ const TxtPage = () => {
 
       <div className="h-screen flex flex-col overflow-hidden">
       {/* Simple Header */}
-      <header className="shrink-0 z-50 bg-background/95 border-b border-border backdrop-blur-sm">
+      <header className="shrink-0 z-50 bg-background/95 border-b border-border backdrop-blur-xs">
         <div className="flex items-center justify-between px-4 md:px-6 h-14">
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
@@ -175,7 +175,7 @@ const TxtPage = () => {
                   </div>
                 ))}
               </div>
-              <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm">
+              <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-xs">
                 <div className="flex flex-col items-center gap-4">
                   <RadarScan size={80} color="#00d4ff" speed={2} />
                   <div className="flex items-center gap-2">

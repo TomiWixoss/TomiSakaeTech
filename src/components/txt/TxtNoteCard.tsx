@@ -88,7 +88,7 @@ export const TxtNoteCard: React.FC<TxtNoteCardProps> = ({
                 }}
               />
             </pre>
-            <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[#0d1117] to-transparent pointer-events-none" />
+            <div className="absolute inset-x-0 bottom-0 h-10 bg-linear-to-t from-[#0d1117] to-transparent pointer-events-none" />
             
             {/* View hint on hover */}
             <div className="absolute inset-0 bg-[#00d4ff]/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">

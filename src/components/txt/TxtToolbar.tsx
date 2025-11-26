@@ -51,7 +51,7 @@ export const TxtToolbar: React.FC<TxtToolbarProps> = ({
   return (
     <div
       ref={toolbarRef}
-      className="sticky top-14 z-40 bg-background/95 backdrop-blur-sm border-b border-border"
+      className="sticky top-14 z-40 bg-background/95 backdrop-blur-xs border-b border-border"
     >
       <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-8">
         <div className="flex items-center justify-between py-3 gap-4">
@@ -73,7 +73,7 @@ export const TxtToolbar: React.FC<TxtToolbarProps> = ({
               onFocus={() => setSearchFocused(true)}
               onBlur={() => setSearchFocused(false)}
               placeholder="SEARCH_QUERY..."
-              className="w-full bg-transparent pl-12 pr-8 py-2.5 text-sm font-mono outline-none placeholder:text-muted-foreground/40"
+              className="w-full bg-transparent pl-12 pr-8 py-2.5 text-sm font-mono outline-hidden placeholder:text-muted-foreground/40"
             />
             
             {/* Animated underline */}

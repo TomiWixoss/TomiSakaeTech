@@ -149,7 +149,7 @@ export const VoidZone: React.FC<VoidZoneProps> = ({
       {[0, 33, 66].map((offset, i) => (
         <div
           key={i}
-          className="absolute left-0 right-0 h-[1px] pointer-events-none z-20"
+          className="absolute left-0 right-0 h-px pointer-events-none z-20"
           style={{
             top: `${(scanlinePos + offset) % 100}%`,
             background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)",

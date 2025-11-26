@@ -29,7 +29,7 @@ export const TxtNavbar: React.FC<TxtNavbarProps> = ({
   }, []);
 
   return (
-    <nav ref={navRef} className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+    <nav ref={navRef} className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xs border-b border-border">
       {/* Top status bar */}
       <div className="border-b border-[#00ff88]/20 bg-[#00ff88]/5">
         <div className="max-w-[1400px] mx-auto px-6 py-2">

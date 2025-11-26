@@ -271,7 +271,7 @@ export default function Home() {
         <button
           onClick={handlePrev}
           disabled={currentIndex === 0}
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-4 border border-border bg-background/80 backdrop-blur-sm disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-4 border border-border bg-background/80 backdrop-blur-xs disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
           style={{ 
             ['--hover-color' as string]: worlds[currentIndex].color 
           }}
@@ -289,7 +289,7 @@ export default function Home() {
         <button
           onClick={handleNext}
           disabled={currentIndex === worlds.length - 1}
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-4 border border-border bg-background/80 backdrop-blur-sm disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-4 border border-border bg-background/80 backdrop-blur-xs disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
           onMouseEnter={(e) => {
             e.currentTarget.style.borderColor = worlds[currentIndex].color;
             e.currentTarget.style.color = worlds[currentIndex].color;

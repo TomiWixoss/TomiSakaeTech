@@ -109,7 +109,7 @@ export const TechHeader: React.FC<TechHeaderProps> = ({
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => setSearchFocused(false)}
                 placeholder={isAISearch ? "// AI SEARCH MODE" : "// SEARCH FILES..."}
-                className="w-full bg-muted/30 border border-border focus:border-foreground/50 pl-12 pr-24 py-3 text-sm font-mono outline-none transition-all placeholder:text-muted-foreground/50"
+                className="w-full bg-muted/30 border border-border focus:border-foreground/50 pl-12 pr-24 py-3 text-sm font-mono outline-hidden transition-all placeholder:text-muted-foreground/50"
                 onKeyDown={(e) => e.key === "Enter" && onSearch()}
               />
               

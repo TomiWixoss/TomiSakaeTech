@@ -170,7 +170,7 @@ export const TxtNoteList: React.FC<TxtNoteListProps> = ({
         </span>
         <ChevronUp className="w-4 h-4" />
         {canScrollUp && (
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#00d4ff]/50 to-transparent" />
+          <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[#00d4ff]/50 to-transparent" />
         )}
       </button>
 
@@ -183,7 +183,7 @@ export const TxtNoteList: React.FC<TxtNoteListProps> = ({
           return (
             <article
               key={note.id}
-              className="list-item h-[calc(33.333%-8px)] shrink-0 group border border-[#00d4ff]/20 hover:border-[#00d4ff]/60 bg-[#0a0a0f]/60 backdrop-blur-sm transition-all duration-300 flex flex-col overflow-hidden cursor-pointer relative"
+              className="list-item h-[calc(33.333%-8px)] shrink-0 group border border-[#00d4ff]/20 hover:border-[#00d4ff]/60 bg-[#0a0a0f]/60 backdrop-blur-xs transition-all duration-300 flex flex-col overflow-hidden cursor-pointer relative"
               onClick={() => onView(note, globalIndex)}
             >
               {/* Item Header */}
@@ -238,7 +238,7 @@ export const TxtNoteList: React.FC<TxtNoteListProps> = ({
                     }}
                   />
                 </pre>
-                <div className="absolute inset-x-3 bottom-3 h-8 bg-gradient-to-t from-[#0d1117] to-transparent pointer-events-none" />
+                <div className="absolute inset-x-3 bottom-3 h-8 bg-linear-to-t from-[#0d1117] to-transparent pointer-events-none" />
               </div>
 
               {/* View overlay on hover - positioned on article level */}
@@ -250,7 +250,7 @@ export const TxtNoteList: React.FC<TxtNoteListProps> = ({
               </div>
 
               {/* Scan line */}
-              <div className="shrink-0 h-0.5 bg-gradient-to-r from-transparent via-[#00d4ff]/30 to-transparent" />
+              <div className="shrink-0 h-0.5 bg-linear-to-r from-transparent via-[#00d4ff]/30 to-transparent" />
             </article>
           );
         })}
@@ -273,7 +273,7 @@ export const TxtNoteList: React.FC<TxtNoteListProps> = ({
         </span>
         <ChevronDown className="w-4 h-4" />
         {canScrollDown && (
-          <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#00d4ff]/50 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-[#00d4ff]/50 to-transparent" />
         )}
       </button>
 

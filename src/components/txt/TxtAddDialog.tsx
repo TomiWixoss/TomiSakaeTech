@@ -91,7 +91,7 @@ export const TxtAddDialog: React.FC<TxtAddDialogProps> = ({
                 onChange={(e) => onChange(e.target.value)}
                 onScroll={handleScroll}
                 placeholder="// Paste your code, text or notes here..."
-                className="flex-1 h-full p-4 bg-transparent text-sm font-mono leading-[1.7] resize-none outline-none text-white placeholder:text-muted-foreground/30 overflow-y-auto"
+                className="flex-1 h-full p-4 bg-transparent text-sm font-mono leading-[1.7] resize-none outline-hidden text-white placeholder:text-muted-foreground/30 overflow-y-auto"
               />
             </div>
           </NeonBorder>

@@ -95,8 +95,8 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ isOpen, onClos
   if (!isOpen || !mounted) return null;
 
   const modalContent = (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
+    <div className="fixed inset-0 z-9999 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-xs" onClick={onClose} />
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <DataStream color="#00ff88" density={8} speed={40} className="opacity-10" />
       </div>
@@ -108,8 +108,8 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ isOpen, onClos
             <div className="absolute inset-0 z-50 bg-black/95 flex flex-col items-center justify-center">
               {/* Animated border */}
               <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#00ff88] to-transparent animate-[scan_1s_linear_infinite]" />
-                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#00ff88] to-transparent animate-[scan_1s_linear_infinite_reverse]" />
+                <div className="absolute top-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-[#00ff88] to-transparent animate-[scan_1s_linear_infinite]" />
+                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-[#00ff88] to-transparent animate-[scan_1s_linear_infinite_reverse]" />
               </div>
               
               {/* Radar effect */}
@@ -156,7 +156,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ isOpen, onClos
             </div>
           )}
 
-          <div className="relative border-b border-border p-4 bg-gradient-to-r from-[#00ff88]/10 to-transparent">
+          <div className="relative border-b border-border p-4 bg-linear-to-r from-[#00ff88]/10 to-transparent">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 border border-[#00ff88] flex items-center justify-center">
@@ -296,8 +296,8 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({ isOpen, onCl
   if (!isOpen || !mounted) return null;
 
   const modalContent = (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
+    <div className="fixed inset-0 z-9999 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-xs" onClick={onClose} />
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <DataStream color="#00ff88" density={8} speed={40} className="opacity-10" />
       </div>
@@ -305,7 +305,7 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({ isOpen, onCl
       <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in fade-in duration-200" onClick={(e) => e.stopPropagation()}>
         <TechCard className="p-0 overflow-hidden" corners hover={false}>
           {/* Header */}
-          <div className="relative border-b border-border p-4 bg-gradient-to-r from-[#00ff88]/10 to-transparent">
+          <div className="relative border-b border-border p-4 bg-linear-to-r from-[#00ff88]/10 to-transparent">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 border border-[#00ff88] flex items-center justify-center">
@@ -382,7 +382,7 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({ isOpen, onCl
                   value={blockedText}
                   onChange={(e) => setBlockedText(e.target.value)}
                   placeholder=".exe&#10;.bat&#10;.cmd"
-                  className="w-full bg-transparent border border-border px-4 py-3 text-sm font-mono outline-none transition-colors focus:border-red-500 resize-none"
+                  className="w-full bg-transparent border border-border px-4 py-3 text-sm font-mono outline-hidden transition-colors focus:border-red-500 resize-none"
                 />
               </div>
             </div>
