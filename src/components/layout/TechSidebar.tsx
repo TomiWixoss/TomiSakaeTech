@@ -249,7 +249,7 @@ export const TechSidebar: React.FC<TechSidebarProps> = ({
         {/* Footer */}
         <div className="px-4 py-2 border-t border-border/50">
           <span className="text-[9px] font-mono text-muted-foreground/50">
-            DA22TTC-TVU SYSTEM
+            TomiSakaeTech - SYSTEM
           </span>
         </div>
       </aside>

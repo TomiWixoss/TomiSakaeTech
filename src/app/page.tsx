@@ -140,7 +140,7 @@ export default function Home() {
                 <Database className="w-5 h-5 text-[#00ff88]" />
               </div>
               <div>
-                <CyberText className="text-lg font-bold" primaryColor="#00ff88" secondaryColor="#00d4ff">DA22TTC</CyberText>
+                <CyberText className="text-lg font-bold" primaryColor="#00ff88" secondaryColor="#00d4ff">TomiSakaeTech</CyberText>
                 <p className="text-[10px] text-muted-foreground font-mono">SELECT_WORLD</p>
               </div>
             </div>

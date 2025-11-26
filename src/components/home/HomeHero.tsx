@@ -64,9 +64,9 @@ export const HomeHero: React.FC<HomeHeroProps> = ({
 
             <h1 className="hero-item text-4xl lg:text-5xl font-light font-mono tracking-tight mb-4">
               {heroComplete ? (
-                <GlitchText intensity="low">DA22TTC</GlitchText>
+                <GlitchText intensity="low">TomiSakaeTech</GlitchText>
               ) : (
-                <TypeWriter text="DA22TTC" speed={80} cursor={false} onComplete={() => setHeroComplete(true)} />
+                <TypeWriter text="TomiSakaeTech" speed={80} cursor={false} onComplete={() => setHeroComplete(true)} />
               )}
               <span className="text-muted-foreground text-2xl lg:text-3xl block mt-2">
                 FILE_SYSTEM

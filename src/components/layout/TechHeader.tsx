@@ -88,7 +88,7 @@ export const TechHeader: React.FC<TechHeaderProps> = ({
             </div>
             <div>
               <GlitchText className="text-sm font-bold tracking-tight" intensity="low">
-                DA22TTC
+                TomiSakaeTech
               </GlitchText>
               <p className="text-[10px] text-muted-foreground font-mono tracking-wider">
                 FILE SYSTEM
