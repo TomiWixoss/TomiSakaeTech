@@ -144,4 +144,28 @@ export const driveService = {
     });
     return response.ok;
   },
+
+  // Preview file
+  async getFilePreview(fileId: string): Promise<{
+    previewType: "text" | "image" | "video" | "audio" | "pdf" | "unsupported";
+    name: string;
+    mimeType: string;
+    size?: string;
+    content?: string;
+    thumbnailLink?: string;
+    downloadUrl?: string;
+    streamUrl?: string;
+    error?: string;
+  }> {
+    const response = await fetch(`/api/worlds/storage/drive/preview?fileId=${fileId}`);
+    if (!response.ok) {
+      return {
+        previewType: "unsupported",
+        name: "",
+        mimeType: "unknown",
+        error: "Failed to load preview",
+      };
+    }
+    return response.json();
+  },
 };

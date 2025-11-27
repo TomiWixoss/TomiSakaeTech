@@ -391,7 +391,7 @@ export const TechToastContainer: React.FC = () => {
   if (!mounted) return null;
 
   return createPortal(
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] flex flex-col-reverse gap-3 items-center">
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[99999] flex flex-col-reverse gap-3 items-center">
       <style jsx global>{`
         @keyframes shimmer {
           0% { transform: translateX(-100%); }

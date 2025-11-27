@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -13,6 +13,7 @@ import { FileTechIcon } from "@/shared/components/icons/TechIcons";
 import { Download, ExternalLink, Copy, Check, X } from "lucide-react";
 import Image from "next/image";
 import { techToast } from "@/shared/components/tech";
+import { useFilePreview } from "../hooks/useFilePreview";
 
 interface FilePreviewDialogProps {
   isOpen: boolean;
@@ -22,18 +23,6 @@ interface FilePreviewDialogProps {
   onDownload: () => void;
 }
 
-interface PreviewData {
-  previewType: "text" | "image" | "video" | "audio" | "pdf" | "unsupported";
-  name: string;
-  mimeType: string;
-  size?: string;
-  content?: string;
-  thumbnailLink?: string;
-  downloadUrl?: string;
-  streamUrl?: string;
-  error?: string;
-}
-
 export const FilePreviewDialog: React.FC<FilePreviewDialogProps> = ({
   isOpen,
   onClose,
@@ -41,38 +30,14 @@ export const FilePreviewDialog: React.FC<FilePreviewDialogProps> = ({
   fileName,
   onDownload,
 }) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [previewData, setPreviewData] = useState<PreviewData | null>(null);
   const [copied, setCopied] = useState(false);
-
-  const fetchPreview = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`/api/drive/preview?fileId=${fileId}`);
-      const data = await response.json();
-      setPreviewData(data);
-    } catch (error) {
-      console.error("Error fetching preview:", error);
-      setPreviewData({
-        previewType: "unsupported",
-        name: fileName,
-        mimeType: "unknown",
-        error: "Failed to load preview",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [fileId, fileName]);
+  const { data: previewData, isLoading, refetch } = useFilePreview(fileId, isOpen && !!fileId);
 
   useEffect(() => {
     if (isOpen && fileId) {
-      fetchPreview();
+      refetch();
     }
-    return () => {
-      setPreviewData(null);
-      setIsLoading(true);
-    };
-  }, [isOpen, fileId, fetchPreview]);
+  }, [isOpen, fileId, refetch]);
 
   const handleCopyContent = () => {
     if (previewData?.content) {
@@ -135,11 +100,7 @@ export const FilePreviewDialog: React.FC<FilePreviewDialogProps> = ({
                 onClick={handleCopyContent}
                 className="h-8 px-2 font-mono text-xs"
               >
-                {copied ? (
-                  <Check className="w-4 h-4" />
-                ) : (
-                  <Copy className="w-4 h-4" />
-                )}
+                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               </Button>
             </div>
             <NeonBorder color="#00ff88" intensity="low">
@@ -167,11 +128,7 @@ export const FilePreviewDialog: React.FC<FilePreviewDialogProps> = ({
       case "video":
         return (
           <div className="p-4">
-            <video
-              controls
-              className="w-full max-h-[60vh]"
-              src={previewData.streamUrl || ""}
-            >
+            <video controls className="w-full max-h-[60vh]" src={previewData.streamUrl || ""}>
               Your browser does not support video playback.
             </video>
           </div>
@@ -181,11 +138,7 @@ export const FilePreviewDialog: React.FC<FilePreviewDialogProps> = ({
         return (
           <div className="p-8 flex flex-col items-center">
             <FileTechIcon size={64} className="text-[#00ff88] mb-6" />
-            <audio
-              controls
-              className="w-full max-w-md"
-              src={previewData.streamUrl || ""}
-            >
+            <audio controls className="w-full max-w-md" src={previewData.streamUrl || ""}>
               Your browser does not support audio playback.
             </audio>
           </div>
@@ -206,17 +159,9 @@ export const FilePreviewDialog: React.FC<FilePreviewDialogProps> = ({
         return (
           <div className="flex flex-col items-center justify-center py-16">
             <FileTechIcon size={48} className="text-muted-foreground mb-4" />
-            <p className="text-sm font-mono text-muted-foreground mb-2">
-              PREVIEW_NOT_SUPPORTED
-            </p>
-            <p className="text-xs font-mono text-muted-foreground/60 mb-4">
-              {previewData.mimeType}
-            </p>
-            <Button
-              onClick={onDownload}
-              variant="outline"
-              className="rounded-none font-mono text-xs"
-            >
+            <p className="text-sm font-mono text-muted-foreground mb-2">PREVIEW_NOT_SUPPORTED</p>
+            <p className="text-xs font-mono text-muted-foreground/60 mb-4">{previewData.mimeType}</p>
+            <Button onClick={onDownload} variant="outline" className="rounded-none font-mono text-xs">
               <Download className="w-4 h-4 mr-2" />
               DOWNLOAD_FILE
             </Button>
@@ -229,7 +174,6 @@ export const FilePreviewDialog: React.FC<FilePreviewDialogProps> = ({
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -239,34 +183,22 @@ export const FilePreviewDialog: React.FC<FilePreviewDialogProps> = ({
             onClick={onClose}
           />
 
-          {/* Dialog */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{
               opacity: 1,
               scale: 1,
               y: 0,
-              transition: {
-                type: "spring",
-                damping: 25,
-                stiffness: 300,
-              },
+              transition: { type: "spring", damping: 25, stiffness: 300 },
             }}
-            exit={{
-              opacity: 0,
-              scale: 0.95,
-              y: -10,
-              transition: { duration: 0.15 },
-            }}
+            exit={{ opacity: 0, scale: 0.95, y: -10, transition: { duration: 0.15 } }}
             className="fixed left-1/2 top-1/2 z-50 w-[95vw] max-w-4xl max-h-[90vh] -translate-x-1/2 -translate-y-1/2 flex flex-col"
           >
             <div className="relative border border-[#00ff88]/40 bg-black/95 overflow-hidden shadow-[0_0_50px_rgba(0,255,136,0.2)] flex flex-col max-h-[90vh]">
-              {/* Glitch lines effect */}
               <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,255,136,0.02)_50%)] bg-[length:100%_4px]" />
               </div>
 
-              {/* Corner accents */}
               <motion.div
                 initial={{ width: 0, height: 0 }}
                 animate={{ width: 24, height: 24 }}
@@ -292,7 +224,6 @@ export const FilePreviewDialog: React.FC<FilePreviewDialogProps> = ({
                 className="absolute bottom-0 right-0 border-b-2 border-r-2 border-[#00ff88]"
               />
 
-              {/* Close button */}
               <button
                 onClick={onClose}
                 className="absolute right-4 top-4 z-20 p-1 text-[#00ff88]/60 hover:text-[#00ff88] transition-colors"
@@ -300,7 +231,6 @@ export const FilePreviewDialog: React.FC<FilePreviewDialogProps> = ({
                 <X className="w-4 h-4" />
               </button>
 
-              {/* Header */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -336,7 +266,6 @@ export const FilePreviewDialog: React.FC<FilePreviewDialogProps> = ({
                 </div>
               </motion.div>
 
-              {/* Content */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -346,7 +275,6 @@ export const FilePreviewDialog: React.FC<FilePreviewDialogProps> = ({
                 {renderPreview()}
               </motion.div>
 
-              {/* Footer */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
