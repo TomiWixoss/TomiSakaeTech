@@ -459,9 +459,8 @@
     border-right: 2px solid;
   }
 
-  /* Input focus glow */
-  .dark input:focus,
-  .dark textarea:focus {
+  /* Input focus glow*/
+  .dark input:focus {
     box-shadow: 0 0 0 1px var(--tech-green), 0 0 10px rgba(0, 255, 136, 0.2);
   }
 
