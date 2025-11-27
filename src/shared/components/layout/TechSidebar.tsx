@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { DriveInfo } from "@/shared/types";
 import { TechProgress, StatusIndicator } from "@/shared/components/tech";
 import { StorageTechIcon } from "@/shared/components/icons/TechIcons";
-import { FolderPlus, FileUp, FolderUp, X } from "lucide-react";
+import { FolderPlus, FileUp, FolderUp, X, QrCode } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 
 declare module "react" {
@@ -24,6 +24,7 @@ interface TechSidebarProps {
   onClose: () => void;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   isLoading?: boolean;
+  onQRUpload?: () => void;
 }
 
 const navItemVariants = {
@@ -49,6 +50,7 @@ export const TechSidebar: React.FC<TechSidebarProps> = ({
   onClose,
   fileInputRef,
   isLoading = false,
+  onQRUpload,
 }) => {
   const folderInputRef = useRef<HTMLInputElement>(null);
 
@@ -164,6 +166,25 @@ export const TechSidebar: React.FC<TechSidebarProps> = ({
                 <FolderUp className="w-4 h-4 text-muted-foreground group-hover:text-[#00ff88] transition-colors" />
                 <span className="font-mono text-xs">UPLOAD_FOLDER</span>
               </motion.label>
+
+              {onQRUpload && (
+                <motion.button
+                  custom={3}
+                  initial="hidden"
+                  animate="visible"
+                  variants={navItemVariants}
+                  whileHover={{ x: 4, backgroundColor: "hsl(var(--muted) / 0.5)" }}
+                  transition={{ duration: 0.2 }}
+                  onClick={() => {
+                    onClose();
+                    onQRUpload();
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors group"
+                >
+                  <QrCode className="w-4 h-4 text-muted-foreground group-hover:text-[#00ff88] transition-colors" />
+                  <span className="font-mono text-xs">QR_UPLOAD</span>
+                </motion.button>
+              )}
 
               {/* Divider */}
               <motion.div
